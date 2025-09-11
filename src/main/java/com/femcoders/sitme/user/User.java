@@ -1,10 +1,11 @@
 package com.femcoders.sitme.user;
 
 import com.femcoders.sitme.reservation.Reservation;
+import com.femcoders.sitme.user.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
-import javax.management.relation.Role;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
