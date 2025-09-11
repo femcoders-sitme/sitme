@@ -18,10 +18,12 @@ public class Space {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 60)
     private String name;
-    @Column(nullable = false, length = 255)
-    private String location;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Location location;
 
     @Column(nullable = false)
     private Integer capacity;
