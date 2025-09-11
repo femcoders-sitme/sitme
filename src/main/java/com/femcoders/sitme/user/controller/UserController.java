@@ -3,8 +3,12 @@ package com.femcoders.sitme.user.controller;
 import com.femcoders.sitme.shared.SuccessResponse;
 import com.femcoders.sitme.user.dtos.login.LoginRequest;
 import com.femcoders.sitme.user.dtos.login.LoginResponse;
+import com.femcoders.sitme.user.dtos.register.UserRequest;
+import com.femcoders.sitme.user.dtos.register.UserResponse;
 import com.femcoders.sitme.user.services.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +28,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserServiceImpl userService;
+
+    @PostMapping("/register")
+    @Operation(summary = "User register",
+            description = "Registers a new user in the system"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "User registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "409", description = "Conflict (username or email already exists)")
+    })
+    public ResponseEntity<SuccessResponse<UserResponse>> register(@RequestBody @Valid UserRequest userRequest) {
+        UserResponse userResponse = userService.addUser(userRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(SuccessResponse.of("User registered successfully", userResponse)
+                );
+    }
 
     @PostMapping("/login")
     @Operation(summary = "User login",
