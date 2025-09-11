@@ -1,5 +1,6 @@
-package com.femcoders.sitme.security;
+package com.femcoders.sitme.security.jwt;
 
+import com.femcoders.sitme.security.userdetails.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

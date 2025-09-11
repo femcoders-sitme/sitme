@@ -1,4 +1,4 @@
-package com.femcoders.sitme.security;
+package com.femcoders.sitme.security.userdetails;
 
 import com.femcoders.sitme.user.User;
 import lombok.RequiredArgsConstructor;
