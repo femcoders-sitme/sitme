@@ -10,7 +10,7 @@ import com.femcoders.sitme.user.dtos.register.UserRequest;
 import com.femcoders.sitme.user.dtos.register.UserResponse;
 import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
