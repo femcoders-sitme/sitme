@@ -2,7 +2,7 @@ package com.femcoders.sitme.user.dtos.register;
 
 import jakarta.validation.constraints.*;
 
-public record UserRequest(
+public record RegisterRequest(
         @NotBlank(message = "Username is required")
         @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters")
         String username,

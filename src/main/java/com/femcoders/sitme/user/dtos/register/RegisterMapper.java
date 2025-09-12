@@ -5,17 +5,17 @@ import com.femcoders.sitme.user.User;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserMapper {
-    public User dtoToEntity(UserRequest userRequest) {
+public class RegisterMapper {
+    public static User dtoToEntity(RegisterRequest registerRequest) {
         return User.builder()
-                .username(userRequest.username())
-                .email(userRequest.email())
-                .password(userRequest.password())
+                .username(registerRequest.username())
+                .email(registerRequest.email())
+                .password(registerRequest.password())
                 .role(Role.USER)
                 .build();
     }
-    public UserResponse entityToDto(User user){
-        return new UserResponse(
+    public static RegisterResponse entityToDto(User user){
+        return new RegisterResponse(
                 user.getUsername(),
                 user.getEmail(),
                 user.getRole()
