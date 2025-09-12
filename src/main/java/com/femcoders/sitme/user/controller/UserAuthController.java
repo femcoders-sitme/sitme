@@ -3,12 +3,10 @@ package com.femcoders.sitme.user.controller;
 import com.femcoders.sitme.shared.SuccessResponse;
 import com.femcoders.sitme.user.dtos.login.LoginRequest;
 import com.femcoders.sitme.user.dtos.login.LoginResponse;
-import com.femcoders.sitme.user.dtos.register.UserRequest;
-import com.femcoders.sitme.user.dtos.register.UserResponse;
-import com.femcoders.sitme.user.services.UserServiceImpl;
+import com.femcoders.sitme.user.dtos.register.RegisterRequest;
+import com.femcoders.sitme.user.dtos.register.RegisterResponse;
+import com.femcoders.sitme.user.services.UserAuthServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,9 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Endpoints for user registration and login")
-public class UserController {
+public class UserAuthController {
 
-    private final UserServiceImpl userService;
+    private final UserAuthServiceImpl userService;
 
     @PostMapping("/register")
     @Operation(summary = "User register",
@@ -38,10 +36,10 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "409", description = "Conflict (username or email already exists)")
     })
-    public ResponseEntity<SuccessResponse<UserResponse>> register(@RequestBody @Valid UserRequest userRequest) {
-        UserResponse userResponse = userService.addUser(userRequest);
+    public ResponseEntity<SuccessResponse<RegisterResponse>> register(@RequestBody @Valid RegisterRequest registerRequest) {
+        RegisterResponse registerResponse = userService.addUser(registerRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(SuccessResponse.of("User registered successfully", userResponse)
+                .body(SuccessResponse.of("User registered successfully", registerResponse)
                 );
     }
 
