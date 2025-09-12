@@ -1,6 +1,7 @@
 package com.femcoders.sitme.security.userdetails;
 
 import com.femcoders.sitme.user.User;
+import com.femcoders.sitme.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
