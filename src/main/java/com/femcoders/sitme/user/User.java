@@ -1,9 +1,9 @@
 package com.femcoders.sitme.user;
 
 import com.femcoders.sitme.reservation.Reservation;
-import com.femcoders.sitme.user.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 
 import java.time.LocalDateTime;
@@ -19,21 +19,22 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
     @Column(name = "username", nullable = false, unique = true, length = 15)
     private String username;
 
     @Column(name = "email", nullable = false, unique = true, length = 60)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 20)
+    @Column(name = "password", nullable = false, length = 60)
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
