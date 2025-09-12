@@ -5,9 +5,9 @@ import com.femcoders.sitme.security.userdetails.CustomUserDetails;
 import com.femcoders.sitme.user.User;
 import com.femcoders.sitme.user.dtos.login.LoginRequest;
 import com.femcoders.sitme.user.dtos.login.LoginResponse;
-import com.femcoders.sitme.user.dtos.register.UserMapper;
-import com.femcoders.sitme.user.dtos.register.UserRequest;
-import com.femcoders.sitme.user.dtos.register.UserResponse;
+import com.femcoders.sitme.user.dtos.register.RegisterMapper;
+import com.femcoders.sitme.user.dtos.register.RegisterRequest;
+import com.femcoders.sitme.user.dtos.register.RegisterResponse;
 import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserServiceImpl implements UserService {
+public class UserAuthServiceImpl implements UserAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -31,21 +31,21 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
 
     @Override
-    public UserResponse addUser(UserRequest userRequest) {
+    public RegisterResponse addUser(RegisterRequest registerRequest) {
 
-        if (userRepository.existsByUsername(userRequest.username())) {
+        if (userRepository.existsByUsername(registerRequest.username())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        if (userRepository.existsByEmail(userRequest.email())) {
+        if (userRepository.existsByEmail(registerRequest.email())) {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        User newUser = UserMapper.dtoToEntity(userRequest);
-        newUser.setPassword(passwordEncoder.encode(userRequest.password()));
+        User newUser = RegisterMapper.dtoToEntity(registerRequest);
+        newUser.setPassword(passwordEncoder.encode(registerRequest.password()));
         User savedUser = userRepository.save(newUser);
 
-        return UserMapper.entityToDto(savedUser);
+        return RegisterMapper.entityToDto(savedUser);
     }
 
     @Override
