@@ -1,10 +1,13 @@
 package com.femcoders.sitme.space.services;
 
-import com.femcoders.sitme.space.SpaceRepository;
+import com.femcoders.sitme.space.Space;
+import com.femcoders.sitme.space.dto.SpaceRequest;
+import com.femcoders.sitme.space.repository.SpaceRepository;
 import com.femcoders.sitme.space.SpaceType;
-import com.femcoders.sitme.space.dto.SpaceRecordMapperImpl;
-import com.femcoders.sitme.space.dto.SpaceRecordResponse;
+import com.femcoders.sitme.space.dto.SpaceMapper;
+import com.femcoders.sitme.space.dto.SpaceResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,28 +17,43 @@ import java.util.List;
 public class SpaceServiceImpl implements SpaceService {
 
     private final SpaceRepository spaceRepository;
-    private final SpaceRecordMapperImpl mapper = new SpaceRecordMapperImpl();
 
     @Override
-    public List<SpaceRecordResponse> getAllSpaces() {
+    public List<SpaceResponse> getAllSpaces() {
         return spaceRepository.findAll()
                 .stream()
-                .map(mapper::entityToDto)
+                .map(SpaceMapper::entityToDto)
                 .toList();
     }
     @Override
-    public List<SpaceRecordResponse> getSpacesByType(SpaceType type) {
+    public List<SpaceResponse> getSpacesByType(SpaceType type) {
         return spaceRepository.findByType(type)
                 .stream()
-                .map(mapper::entityToDto)
+                .map(SpaceMapper::entityToDto)
                 .toList();
     }
 
     @Override
-    public List<SpaceRecordResponse> getAvailableSpaces() {
+    public List<SpaceResponse> getAvailableSpaces() {
         return spaceRepository.findByIsAvailableTrue()
                 .stream()
-                .map(mapper::entityToDto)
+                .map(SpaceMapper::entityToDto)
                 .toList();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public SpaceResponse addSpace(SpaceRequest spaceRequest) {
+
+        boolean existsSpace = spaceRepository.existsByNameAndLocation(spaceRequest.name(), spaceRequest.location());
+
+        if (existsSpace) {
+            throw  new IllegalArgumentException("This space already exists");
+        }
+
+        Space newSpace = SpaceMapper.dtoToEntity(spaceRequest);
+        Space savedSpace = spaceRepository.save(newSpace);
+
+        return SpaceMapper.entityToDto(savedSpace);
     }
 }
