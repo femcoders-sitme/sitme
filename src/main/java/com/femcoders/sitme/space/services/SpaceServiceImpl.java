@@ -45,7 +45,7 @@ public class SpaceServiceImpl implements SpaceService {
     @Override
     public SpaceResponse addSpace(SpaceRequest spaceRequest) {
 
-        boolean existsSpace = spaceRepository.existsByNameAndLocation(spaceRequest.name(), spaceRequest.location());
+        boolean existsSpace = spaceRepository.existsByName(spaceRequest.name());
 
         if (existsSpace) {
             throw  new IllegalArgumentException("This space already exists");
