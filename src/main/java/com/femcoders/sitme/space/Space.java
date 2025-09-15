@@ -3,6 +3,7 @@ package com.femcoders.sitme.space;
 import com.femcoders.sitme.reservation.Reservation;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +39,7 @@ public class Space {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -46,11 +48,4 @@ public class Space {
     @EqualsAndHashCode.Exclude
     private List<Reservation> reservations;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        if (this.isAvailable == null) {
-            this.isAvailable = true;
-        }
-    }
 }

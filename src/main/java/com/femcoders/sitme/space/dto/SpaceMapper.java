@@ -2,9 +2,8 @@ package com.femcoders.sitme.space.dto;
 
 import com.femcoders.sitme.space.Space;
 
-public class SpaceRecordMapperImpl implements SpaceRecordMapper {
-    @Override
-    public Space dtoToEntity(SpaceRecordRequest request) {
+public class SpaceMapper {
+        public static Space dtoToEntity(SpaceRequest request) {
         if (request == null) return null;
 
         return Space.builder()
@@ -17,22 +16,17 @@ public class SpaceRecordMapperImpl implements SpaceRecordMapper {
                 .build();
     }
 
-    @Override
-    public SpaceRecordResponse entityToDto(Space space) {
+    public static SpaceResponse entityToDto(Space space) {
         if (space == null) return null;
 
-        return new SpaceRecordResponse(
+        return new SpaceResponse(
                 space.getId(),
                 space.getName(),
                 space.getLocation().name().replace("_", " "),
                 space.getCapacity(),
-                capitalize(space.getType().name()),
+                space.getType().name(),
                 space.getIsAvailable(),
                 space.getImageUrl()
         );
-    }
-
-    private String capitalize(String input) {
-        return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
     }
 }
