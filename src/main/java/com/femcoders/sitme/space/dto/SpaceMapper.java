@@ -8,7 +8,6 @@ public class SpaceMapper {
 
         return Space.builder()
                 .name(request.name())
-                .location(request.location())
                 .capacity(request.capacity())
                 .type(request.type())
                 .isAvailable(request.isAvailable() != null ? request.isAvailable() : true)
@@ -20,9 +19,7 @@ public class SpaceMapper {
         if (space == null) return null;
 
         return new SpaceResponse(
-                space.getId(),
                 space.getName(),
-                space.getLocation().name().replace("_", " "),
                 space.getCapacity(),
                 space.getType().name(),
                 space.getIsAvailable(),
