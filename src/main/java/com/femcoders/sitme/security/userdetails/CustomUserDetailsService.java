@@ -17,11 +17,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
 
-        Optional<User> user = userRepository.findByUsername(username);
+        Optional<User> user = userRepository.findByUsername(identifier);
+
+        if (user.isEmpty()) {
+            user = userRepository.findByEmail(identifier);
+        }
 
         return user.map(userEntity -> new CustomUserDetails(userEntity))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
     }
 }

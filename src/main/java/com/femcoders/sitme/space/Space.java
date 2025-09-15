@@ -3,6 +3,7 @@ package com.femcoders.sitme.space;
 import com.femcoders.sitme.reservation.Reservation;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,10 +19,12 @@ public class Space {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 60)
     private String name;
-    @Column(nullable = false, length = 255)
-    private String location;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Location location;
 
     @Column(nullable = false)
     private Integer capacity;
@@ -36,6 +39,7 @@ public class Space {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -44,11 +48,4 @@ public class Space {
     @EqualsAndHashCode.Exclude
     private List<Reservation> reservations;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        if (this.isAvailable == null) {
-            this.isAvailable = true;
-        }
-    }
 }
