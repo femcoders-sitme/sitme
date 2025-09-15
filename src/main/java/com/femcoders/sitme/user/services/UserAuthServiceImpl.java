@@ -48,7 +48,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         User newUser = RegisterMapper.dtoToEntity(registerRequest);
         newUser.setPassword(passwordEncoder.encode(registerRequest.password()));
         User savedUser = userRepository.save(newUser);
-        emailService.sendRegistrationEmail(newUser.getEmail(), newUser.getUsername());
+        emailService.sendRegistrationEmail(savedUser.getEmail(), savedUser.getUsername());
 
         return RegisterMapper.entityToDto(savedUser);
     }
