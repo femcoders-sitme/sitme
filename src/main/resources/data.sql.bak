@@ -1,15 +1,15 @@
 INSERT INTO users (id, username, email, password, role, created_at) VALUES
-(1,  'admin',   'admin@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_ADMIN', NOW()),
-(2,  'debora',  'debora@sitme.com', '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(3,  'roberto', 'roberto@sitme.com','$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(4,  'jenni',   'jenni@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(5,  'carmen',  'carmen@sitme.com', '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(6,  'maribel', 'maribel@sitme.com','$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(7,  'paula',   'paula@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(8,  'luis',    'luis@sitme.com',   '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(9,  'ana',     'ana@sitme.com',    '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(10, 'sergio',  'sergio@sitme.com', '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW()),
-(11, 'marta',   'marta@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ROLE_USER',  NOW());
+(1,  'admin',   'admin@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'ADMIN', NOW()),
+(2,  'debora',  'debora@sitme.com', '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(3,  'roberto', 'roberto@sitme.com','$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(4,  'jenni',   'jenni@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(5,  'carmen',  'carmen@sitme.com', '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(6,  'maribel', 'maribel@sitme.com','$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(7,  'paula',   'paula@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(8,  'luis',    'luis@sitme.com',   '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(9,  'ana',     'ana@sitme.com',    '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(10, 'sergio',  'sergio@sitme.com', '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW()),
+(11, 'marta',   'marta@sitme.com',  '$2a$12$X1W1O3oiCmoNffQnCXato./fd0980sACZhf/xvFrAUddOoZWKvdv6', 'USER',  NOW());
 INSERT INTO spaces (id, name, location, capacity, type, is_available, image_url, created_at) VALUES
 (1,  'Room A', 'North Wing / Floor 1', 8,  'ROOM',  TRUE,  'https://picsum.photos/seed/roomA/600/400', NOW()),
 (2,  'Room B', 'North Wing / Floor 1', 6,  'ROOM',  TRUE,  'https://picsum.photos/seed/roomB/600/400', NOW()),
@@ -41,8 +41,7 @@ INSERT INTO spaces (id, name, location, capacity, type, is_available, image_url,
 (28, 'Table 18', 'North Wing / F2',      2, 'TABLE', TRUE,  'https://picsum.photos/seed/table18/600/400', NOW()),
 (29, 'Table 19', 'West Wing / F1',       4, 'TABLE', TRUE,  'https://picsum.photos/seed/table19/600/400', NOW()),
 (30, 'Table 20', 'West Wing / F1',       4, 'TABLE', TRUE,  'https://picsum.photos/seed/table20/600/400', NOW());
-INSERT INTO reservation
-(id, user_id, space_id, reservation_date, time_slot, status, email_sent, created_at) VALUES
+INSERT INTO reservations (id, user_id, space_id, reservation_date, time_slot, status, email_sent, created_at) VALUES
 (1,  2,  1,  '2025-09-12', 'MORNING',   'ACTIVE',     TRUE,  NOW()),
 (2,  3,  1,  '2025-09-12', 'AFTERNOON', 'ACTIVE',     TRUE,  NOW()),
 (3,  4,  2,  '2025-09-13', 'FULL_DAY',  'COMPLETED',  TRUE,  NOW()),

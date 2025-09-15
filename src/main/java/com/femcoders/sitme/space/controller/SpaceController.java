@@ -1,9 +1,11 @@
-package com.femcoders.sitme.space;
+package com.femcoders.sitme.space.controller;
 
-
-import com.femcoders.sitme.space.dto.SpaceRecordRequest;
-import com.femcoders.sitme.space.dto.SpaceRecordResponse;
+import com.femcoders.sitme.shared.SuccessResponse;
+import com.femcoders.sitme.space.SpaceType;
+import com.femcoders.sitme.space.dto.SpaceRequest;
+import com.femcoders.sitme.space.dto.SpaceResponse;
 import com.femcoders.sitme.space.services.SpaceService;
+import com.femcoders.sitme.space.services.SpaceServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +27,7 @@ import java.util.List;
 @RequestMapping("/api/spaces")
 public class SpaceController {
 
-    private final SpaceService spaceService;
+    private final SpaceServiceImpl spaceService;
 
     @Operation(
             summary = "Get all spaces",
@@ -33,10 +35,10 @@ public class SpaceController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Spaces retrieved successfully",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceRecordResponse.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceResponse.class))))
     })
     @GetMapping
-    public ResponseEntity<List<SpaceRecordResponse>> getAllSpaces() {
+    public ResponseEntity<List<SpaceResponse>> getAllSpaces() {
         return ResponseEntity.ok(spaceService.getAllSpaces());
     }
     @Operation(
@@ -45,10 +47,10 @@ public class SpaceController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Spaces filtered successfully",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceRecordResponse.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceResponse.class))))
     })
     @GetMapping("/filter/type")
-    public ResponseEntity<List<SpaceRecordResponse>> getSpacesByType(@RequestParam SpaceType type) {
+    public ResponseEntity<List<SpaceResponse>> getSpacesByType(@RequestParam SpaceType type) {
         return ResponseEntity.ok(spaceService.getSpacesByType(type));
     }
 
@@ -58,10 +60,48 @@ public class SpaceController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Available spaces retrieved successfully",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceRecordResponse.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceResponse.class))))
     })
     @GetMapping("/filter/available")
-    public ResponseEntity<List<SpaceRecordResponse>> getAvailableSpaces() {
+    public ResponseEntity<List<SpaceResponse>> getAvailableSpaces() {
         return ResponseEntity.ok(spaceService.getAvailableSpaces());
     }
+
+    @Operation(
+            summary = "Create a new space",
+            description = "Adds a new space to the system. Only users with ADMIN role can perform this action."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Space created successfully",
+                    content = @Content(schema = @Schema(implementation = SpaceResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Space already exists",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "User does not have ADMIN role",
+                    content = @Content)
+    })
+    @PostMapping
+    public ResponseEntity<SuccessResponse<SpaceResponse>> addSpace(@Valid @RequestBody SpaceRequest request) {
+
+        SpaceResponse newSpace = spaceService.addSpace(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(SuccessResponse.of("Space created successfully", newSpace));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

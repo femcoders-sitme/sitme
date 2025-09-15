@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
-public record SpaceRecordRequest(
+public record SpaceRequest(
         @NotBlank(message = "Name is required")
         @Size(max = 60, message = "Name must be less than 60 characters")
         String name,

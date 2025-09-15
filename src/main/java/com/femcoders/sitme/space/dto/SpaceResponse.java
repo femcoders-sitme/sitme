@@ -1,6 +1,6 @@
 package com.femcoders.sitme.space.dto;
 
-public record SpaceRecordResponse(
+public record SpaceResponse(
         Long id,
         String name,
         String location,
