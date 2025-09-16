@@ -2,6 +2,8 @@ package com.femcoders.sitme.space.services;
 
 import com.femcoders.sitme.space.Space;
 import com.femcoders.sitme.space.dto.SpaceRequest;
+import com.femcoders.sitme.space.exceptions.InvalidSpaceNameException;
+import com.femcoders.sitme.space.exceptions.SpaceAlreadyExistsException;
 import com.femcoders.sitme.space.repository.SpaceRepository;
 import com.femcoders.sitme.space.SpaceType;
 import com.femcoders.sitme.space.dto.SpaceMapper;
@@ -46,10 +48,12 @@ public class SpaceServiceImpl implements SpaceService {
     @Override
     public SpaceResponse addSpace(SpaceRequest spaceRequest) {
 
-        boolean existsSpace = spaceRepository.existsByName(spaceRequest.name());
+        if (spaceRequest.name() == null || spaceRequest.name().isBlank()) {
+            throw new InvalidSpaceNameException(spaceRequest.name());
+        }
 
-        if (existsSpace) {
-            throw  new IllegalArgumentException("This space already exists");
+        if (spaceRepository.existsByName(spaceRequest.name())) {
+            throw new SpaceAlreadyExistsException(spaceRequest.name());
         }
 
         Space newSpace = SpaceMapper.dtoToEntity(spaceRequest);

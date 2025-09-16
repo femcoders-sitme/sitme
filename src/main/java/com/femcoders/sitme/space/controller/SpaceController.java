@@ -1,10 +1,9 @@
 package com.femcoders.sitme.space.controller;
 
-import com.femcoders.sitme.shared.SuccessResponse;
+import com.femcoders.sitme.shared.responses.SuccessResponse;
 import com.femcoders.sitme.space.SpaceType;
 import com.femcoders.sitme.space.dto.SpaceRequest;
 import com.femcoders.sitme.space.dto.SpaceResponse;
-import com.femcoders.sitme.space.services.SpaceService;
 import com.femcoders.sitme.space.services.SpaceServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
