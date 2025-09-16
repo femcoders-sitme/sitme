@@ -1,4 +1,4 @@
-package com.femcoders.sitme.shared;
+package com.femcoders.sitme.shared.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
