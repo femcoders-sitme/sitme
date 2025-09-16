@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +55,23 @@ public class SpaceServiceImpl implements SpaceService {
         Space newSpace = SpaceMapper.dtoToEntity(spaceRequest);
         Space savedSpace = spaceRepository.save(newSpace);
 
+        return SpaceMapper.entityToDto(savedSpace);
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public SpaceResponse updateSpace(Long idSpace, SpaceRequest spaceRequest){
+        Space isExisting = spaceRepository.findById(idSpace)
+                .orElseThrow(() -> new RuntimeException("Not exists by id: " + idSpace));
+        boolean existsSpace = spaceRepository.existsByName(spaceRequest.name());
+        if (existsSpace) {
+            throw new RuntimeException("Already exists with this name: " + spaceRequest.name());
+        }
+        isExisting.setName(spaceRequest.name());
+        isExisting.setCapacity(spaceRequest.capacity());
+        isExisting.setType(spaceRequest.type());
+        isExisting.setIsAvailable(spaceRequest.isAvailable());
+        isExisting.setImageUrl(spaceRequest.imageUrl());
+        Space savedSpace = spaceRepository.save(isExisting);
         return SpaceMapper.entityToDto(savedSpace);
     }
 }
