@@ -22,10 +22,6 @@ public class Space {
     @Column(nullable = false, length = 60)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Location location;
-
     @Column(nullable = false)
     private Integer capacity;
 
