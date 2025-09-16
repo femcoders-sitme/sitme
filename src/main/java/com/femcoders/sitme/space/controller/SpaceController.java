@@ -88,20 +88,24 @@ public class SpaceController {
                 .body(SuccessResponse.of("Space created successfully", newSpace));
     }
 
+    @Operation(
+            summary = "Update a space",
+            description = "Allows you to make changes to the existing space. Only users with the ADMIN role can perform this action"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Space updated successfully",
+                    content = @Content(schema = @Schema(implementation = SpaceResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Space already exists",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "User does not have ADMIN role",
+                    content = @Content)
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<SuccessResponse<SpaceResponse>> updateSpace(@PathVariable Long id, @Valid @RequestBody SpaceRequest request) {
 
+        SpaceResponse updateSpace = spaceService.updateSpace(id, request);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(SuccessResponse.of("Space updated successfully", updateSpace));
+    }
 }
