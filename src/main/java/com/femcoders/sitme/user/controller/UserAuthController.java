@@ -1,6 +1,6 @@
 package com.femcoders.sitme.user.controller;
 
-import com.femcoders.sitme.shared.SuccessResponse;
+import com.femcoders.sitme.shared.responses.SuccessResponse;
 import com.femcoders.sitme.user.dtos.login.LoginRequest;
 import com.femcoders.sitme.user.dtos.login.LoginResponse;
 import com.femcoders.sitme.user.dtos.register.RegisterRequest;
