@@ -9,6 +9,7 @@ import com.femcoders.sitme.user.dtos.login.LoginResponse;
 import com.femcoders.sitme.user.dtos.register.RegisterMapper;
 import com.femcoders.sitme.user.dtos.register.RegisterRequest;
 import com.femcoders.sitme.user.dtos.register.RegisterResponse;
+import com.femcoders.sitme.user.exceptions.InvalidCredentialsException;
 import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         } catch (UsernameNotFoundException exception) {
             throw new EntityNotFoundException("User not found: " + loginRequest.identifier());
         } catch (BadCredentialsException exception) {
-            throw new BadCredentialsException("Invalid credentials for: " + loginRequest.identifier());
+            throw new InvalidCredentialsException("Invalid credentials for: " + loginRequest.identifier());
         }
     }
 }
