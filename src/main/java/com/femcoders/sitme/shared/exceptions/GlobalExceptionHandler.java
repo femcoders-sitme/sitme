@@ -1,5 +1,6 @@
 package com.femcoders.sitme.shared.exceptions;
 
+import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
 import com.femcoders.sitme.user.exceptions.InvalidCredentialsException;
 import com.femcoders.sitme.user.exceptions.UserNameNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +40,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException exception, HttpServletRequest request) {
+
+        ErrorResponse error = buildErrorResponse(
+                exception.getErrorCode(),
+                exception.getMessage(),
+                HttpStatus.CONFLICT,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IdentifierAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleIdentifierAlreadyExists(IdentifierAlreadyExistsException exception, HttpServletRequest request) {
 
         ErrorResponse error = buildErrorResponse(
                 exception.getErrorCode(),

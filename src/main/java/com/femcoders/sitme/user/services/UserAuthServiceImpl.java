@@ -9,6 +9,7 @@ import com.femcoders.sitme.user.dtos.login.LoginResponse;
 import com.femcoders.sitme.user.dtos.register.RegisterMapper;
 import com.femcoders.sitme.user.dtos.register.RegisterRequest;
 import com.femcoders.sitme.user.dtos.register.RegisterResponse;
+import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
 import com.femcoders.sitme.user.exceptions.InvalidCredentialsException;
 import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,11 +39,11 @@ public class UserAuthServiceImpl implements UserAuthService {
     public RegisterResponse addUser(RegisterRequest registerRequest) {
 
         if (userRepository.existsByUsername(registerRequest.username())) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new IdentifierAlreadyExistsException("Username already exists");
         }
 
         if (userRepository.existsByEmail(registerRequest.email())) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new IdentifierAlreadyExistsException("Email already registered");
         }
 
         User newUser = RegisterMapper.dtoToEntity(registerRequest);
