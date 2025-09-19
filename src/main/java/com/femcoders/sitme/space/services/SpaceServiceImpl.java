@@ -62,9 +62,9 @@ public class SpaceServiceImpl implements SpaceService {
     }
     @PreAuthorize("hasRole('ADMIN')")
     @Override
-    public SpaceResponse updateSpace(Long idSpace, SpaceRequest spaceRequest){
-        Space isExisting = spaceRepository.findById(idSpace)
-                .orElseThrow(() -> new RuntimeException("Not exists by id: " + idSpace));
+    public SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest){
+        Space isExisting = spaceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not exists by id: " + id));
         isExisting.setName(spaceRequest.name());
         isExisting.setCapacity(spaceRequest.capacity());
         isExisting.setType(spaceRequest.type());
