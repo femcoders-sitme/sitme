@@ -1,6 +1,8 @@
 package com.femcoders.sitme.shared.exceptions;
 
 import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
+import com.femcoders.sitme.space.exceptions.InvalidSpaceNameException;
+import com.femcoders.sitme.space.exceptions.SpaceAlreadyExistsException;
 import com.femcoders.sitme.user.exceptions.InvalidCredentialsException;
 import com.femcoders.sitme.user.exceptions.UserNameNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -94,5 +96,25 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler(SpaceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleSpaceAlreadyExists(SpaceAlreadyExistsException exception, HttpServletRequest request) {
+        ErrorResponse errorResponse = buildErrorResponse(
+                exception.getErrorCode(),
+                exception.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidSpaceNameException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidSpaceName(InvalidSpaceNameException exception, HttpServletRequest request) {
+        ErrorResponse errorResponse = buildErrorResponse(
+                exception.getErrorCode(),
+                exception.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
