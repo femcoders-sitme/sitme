@@ -6,6 +6,7 @@ import com.femcoders.sitme.user.exceptions.UserNameNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -44,11 +45,11 @@ public class GlobalExceptionHandler {
         ErrorResponse error = buildErrorResponse(
                 exception.getErrorCode(),
                 exception.getMessage(),
-                HttpStatus.CONFLICT,
+                HttpStatus.UNAUTHORIZED,
                 request.getRequestURI()
         );
 
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(IdentifierAlreadyExistsException.class)
@@ -57,10 +58,41 @@ public class GlobalExceptionHandler {
         ErrorResponse error = buildErrorResponse(
                 exception.getErrorCode(),
                 exception.getMessage(),
-                HttpStatus.UNAUTHORIZED,
+                HttpStatus.CONFLICT,
                 request.getRequestURI()
         );
 
-        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request) {
+
+        String message = exception.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .orElse("Invalid input");
+
+        ErrorResponse error = buildErrorResponse(
+                ErrorCode.VALIDATION_01,
+                message,
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception exception, HttpServletRequest request) {
+
+        ErrorResponse error = buildErrorResponse(
+                ErrorCode.SERVER_01,
+                "Internal server error",
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
