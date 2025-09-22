@@ -10,5 +10,6 @@ public interface SpaceService {
     List<SpaceResponse> getSpacesByType(SpaceType type);
     List<SpaceResponse> getAvailableSpaces();
     SpaceResponse addSpace(SpaceRequest spaceRequest);
+    SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest);
 
 }

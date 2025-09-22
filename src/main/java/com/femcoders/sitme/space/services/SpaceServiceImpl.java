@@ -60,4 +60,17 @@ public class SpaceServiceImpl implements SpaceService {
 
         return SpaceMapper.entityToDto(savedSpace);
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest){
+        Space isExisting = spaceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not exists by id: " + id));
+        isExisting.setName(spaceRequest.name());
+        isExisting.setCapacity(spaceRequest.capacity());
+        isExisting.setType(spaceRequest.type());
+        isExisting.setIsAvailable(spaceRequest.isAvailable());
+        isExisting.setImageUrl(spaceRequest.imageUrl());
+        Space savedSpace = spaceRepository.save(isExisting);
+        return SpaceMapper.entityToDto(savedSpace);
+    }
 }
