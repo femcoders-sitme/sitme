@@ -1,6 +1,5 @@
 package com.femcoders.sitme.user.dtos.user;
 
-import com.femcoders.sitme.user.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -17,7 +16,5 @@ public record UserUpdateRequest(
         @NotBlank(message = "Password is required")
         @Pattern(message = "Password must contain a minimum of 8 characters, including a number, one uppercase letter, one lowercase letter and one special character",
                 regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+=.])(?=\\S+$).{8,}$")
-        String password,
-
-        Role role) {
+        String password) {
 }

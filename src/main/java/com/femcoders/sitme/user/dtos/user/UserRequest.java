@@ -8,7 +8,7 @@ public record UserRequest(
         @Size(min = 2, max = 10, message = "Name must contain min 2 and max 10 characters")
         String username,
         @NotBlank(message = "Email is required")
-        @Size(min = 10, max = 60, message = "Email must contain min 2 and max 20 characters")
+        @Size(min = 10, max = 60, message = "Email must contain min 2 and max 60 characters")
         String email,
         @NotBlank(message = "Password is required")
         String password
