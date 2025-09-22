@@ -9,7 +9,9 @@ import com.femcoders.sitme.user.dtos.login.LoginResponse;
 import com.femcoders.sitme.user.dtos.register.RegisterMapper;
 import com.femcoders.sitme.user.dtos.register.RegisterRequest;
 import com.femcoders.sitme.user.dtos.register.RegisterResponse;
+import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
 import com.femcoders.sitme.user.exceptions.InvalidCredentialsException;
+import com.femcoders.sitme.user.exceptions.UserNameNotFoundException;
 import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +40,11 @@ public class UserAuthServiceImpl implements UserAuthService {
     public RegisterResponse addUser(RegisterRequest registerRequest) {
 
         if (userRepository.existsByUsername(registerRequest.username())) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new IdentifierAlreadyExistsException("Username already exists");
         }
 
         if (userRepository.existsByEmail(registerRequest.email())) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new IdentifierAlreadyExistsException("Email already registered");
         }
 
         User newUser = RegisterMapper.dtoToEntity(registerRequest);
@@ -57,6 +59,12 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest loginRequest) {
 
+        boolean userExists = userRepository.existsByUsername(loginRequest.identifier()) || userRepository.existsByEmail(loginRequest.identifier());
+
+        if (!userExists) {
+            throw new UserNameNotFoundException(loginRequest.identifier());
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -70,8 +78,6 @@ public class UserAuthServiceImpl implements UserAuthService {
 
             return new LoginResponse(token);
 
-        } catch (UsernameNotFoundException exception) {
-            throw new EntityNotFoundException("User not found: " + loginRequest.identifier());
         } catch (BadCredentialsException exception) {
             throw new InvalidCredentialsException("Invalid credentials for: " + loginRequest.identifier());
         }

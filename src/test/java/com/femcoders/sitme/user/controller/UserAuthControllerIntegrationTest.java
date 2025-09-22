@@ -86,17 +86,75 @@ public class UserAuthControllerIntegrationTest {
         assertNotEquals(TEST_PASSWORD, savedUser.getPassword());
         assertTrue(bCryptPasswordEncoder.matches(TEST_PASSWORD, savedUser.getPassword()));
     }
-//    @Test
-//    @DisplayName("POST /register | should return 409 when email already exists")
-//    void addUser_WhenEmailExists_Returns409() throws Exception {
-//        userTestHelper.existingUser(TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD, TEST_ROLE);
-//
-//        RegisterRequest duplicateEmailUser = new RegisterRequest(
-//                "New User",
-//                TEST_EMAIL,
-//                TEST_PASSWORD
-//        );
-//    }
+
+    @Test
+    @DisplayName("POST /register | should return 409 when email already exists")
+    void addUser_WhenEmailExists_Returns409() throws Exception {
+        userTestHelper.existingUser(TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD, TEST_ROLE);
+
+        RegisterRequest duplicateEmailUser = new RegisterRequest(
+                "New User",
+                TEST_EMAIL,
+                TEST_PASSWORD
+        );
+    }
+
+    @Test
+    @DisplayName("POST /register - should return 409 when username already exists")
+    void addUser_WhenUsernameExists_ReturnsConflict() throws Exception {
+
+        userTestHelper.existingUser(TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD, TEST_ROLE);
+
+        RegisterRequest duplicateUsernameUser = new RegisterRequest(
+                TEST_USERNAME,
+                "different.email@fcmh.com",
+                TEST_PASSWORD
+        );
+
+        apiHelper.performErrorRequest(post(REGISTER_URL),
+                duplicateUsernameUser,
+                "AUTH_03",
+                409,
+                "Username already exists"
+        );
+    }
+
+    @Test
+    @DisplayName("POST /register - should return 400 for invalid email")
+    void addUser_WhenInvalidEmail_ReturnsBadRequest() throws Exception {
+
+        RegisterRequest invalidEmailUser = new RegisterRequest(
+                TEST_USERNAME,
+                "invalid email",
+                TEST_PASSWORD
+        );
+
+        apiHelper.performErrorRequest(post(REGISTER_URL),
+                invalidEmailUser,
+                "VALIDATION_01",
+                400,
+                "Email is not valid"
+        );
+    }
+
+    @Test
+    @DisplayName("POST /register - should return 400 for weak password")
+    void addUser_WhenWeakPassword_ReturnsBadRequest() throws Exception {
+
+        RegisterRequest weakPasswordUser = new RegisterRequest(
+                TEST_USERNAME,
+                TEST_EMAIL,
+                "weak-password"
+        );
+
+        apiHelper.performErrorRequest(post(REGISTER_URL),
+                weakPasswordUser,
+                "VALIDATION_01",
+                400,
+                "Password must contain a minimum of 12 characters, including a number, one uppercase letter, one lowercase letter and one special character"
+        );
+    }
+
     @ParameterizedTest(name = "Login with identifier={0}")
     @DisplayName("POST /login | should login a user successfully")
     @ValueSource(strings = {TEST_EMAIL, TEST_USERNAME})
@@ -114,5 +172,63 @@ public class UserAuthControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.token").isString())
                 .andExpect(jsonPath("$.data.token").value(notNullValue()));
+    }
+
+    @Test
+    @DisplayName("POST /login - should return 404 for nonexistent user")
+    void login_WhenUserNotFound_ReturnsUnauthorized() throws Exception {
+
+        LoginRequest loginRequest = new LoginRequest("Nonexistent@fcmh.com", TEST_PASSWORD);
+
+        apiHelper.performErrorRequest(post(LOGIN_URL),
+                loginRequest,
+                "NOT_FOUND",
+                404,
+                "not found"
+        );
+    }
+
+    @Test
+    @DisplayName("POST /login - should return 401 for wrong password")
+    void login_WhenPasswordIsIncorrect_ReturnsUnauthorized() throws Exception {
+
+        userTestHelper.existingUser(TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD, TEST_ROLE);
+
+        LoginRequest loginRequest = new LoginRequest(TEST_EMAIL, "WrongPassword123.");
+
+        apiHelper.performErrorRequest(post(LOGIN_URL),
+                loginRequest,
+                "AUTH_02",
+                401,
+                "Invalid credentials"
+        );
+    }
+
+    @Test
+    @DisplayName("POST /login - should return 400 for empty identifier")
+    void login_WhenEmptyIdentifier_ReturnsBadRequest() throws Exception {
+
+        LoginRequest loginRequest = new LoginRequest("", TEST_PASSWORD);
+
+        apiHelper.performErrorRequest(post(LOGIN_URL),
+                loginRequest,
+                "VALIDATION_01",
+                400,
+                "Username or e-mail is required"
+        );
+    }
+
+    @Test
+    @DisplayName("POST /login - should return 400 for empty password")
+    void login_WhenEmptyPassword_ReturnsBadRequest() throws Exception {
+
+        LoginRequest loginRequest = new LoginRequest(TEST_USERNAME, "");
+
+        apiHelper.performErrorRequest(post(LOGIN_URL),
+                loginRequest,
+                "VALIDATION_01",
+                400,
+                "Password is required"
+        );
     }
 }
