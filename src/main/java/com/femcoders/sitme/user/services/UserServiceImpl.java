@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,4 +47,33 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userRepository.save(existingUser);
         return userMapper.entityToDto(updatedUser);
     }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfile(UserUpdateRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User profileUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNameNotFoundException(username));
+
+        profileUser.setUsername(request.username());
+        profileUser.setEmail(request.email());
+        profileUser.setPassword(passwordEncoder.encode(request.password()));
+
+        User updateProfile =  userRepository.save(profileUser);
+        return userMapper.entityToDto(updateProfile);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse deleteUser(Long id) {
+        User eliminateUser = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id " + id));
+
+        UserResponse deletedUser = userMapper.entityToDto(eliminateUser);
+        userRepository.delete(eliminateUser);
+        return deletedUser;
+    }
 }
+
