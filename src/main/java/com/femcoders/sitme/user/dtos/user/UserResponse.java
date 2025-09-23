@@ -10,6 +10,8 @@ public record UserResponse(
         String username,
         String email,
         Role role,
+        String imageUrl,
+        String cloudinaryImageUrl,
         LocalDateTime createdAt,
         List<Reservation> reservations
 ) {

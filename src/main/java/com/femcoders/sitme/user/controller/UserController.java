@@ -15,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +30,19 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserById(
             @PathVariable Long id) {
         UserResponse userResponse = userService.getUserById(id);
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @PostMapping("/{id}/image")
+    @Operation(summary = "Upload profile image for a user")
+    @ApiResponse(responseCode = "200", description = "Image uploaded successfully")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<UserResponse> uploadUserImage(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file
+    ) {
+
+        UserResponse userResponse = userService.uploadUserImage(id, file);
         return ResponseEntity.ok(userResponse);
     }
 
@@ -49,5 +65,20 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessResponse.of("User profile updated successfully", updatedUser));
+    }
+
+    @DeleteMapping("/{id}/image")
+    @Operation(summary = "Delete user's profile image",
+            description = "Deletes the profile image from Cloudinary and clears it in the database.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Image deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<SuccessResponse> deleteUserImage(@PathVariable Long id) {
+        userService.deleteUserImage(id);
+
+        return ResponseEntity.ok(
+                new SuccessResponse(true, "User image deleted successfully", LocalDateTime.now())
+        );
     }
 }
