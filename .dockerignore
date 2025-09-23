@@ -1,0 +1,28 @@
+### Maven build ###
+target/
+build/
+
+### IDE settings ###
+*.iml
+.idea/
+.vscode/
+*.class
+
+### OS / temp files ###
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+### Git ###
+.git
+.gitignore
+
+### Environment / secrets ###
+*.env
+.env.local
+.env.docker
+
+### Docker ###
+docker-compose.yml
+Dockerfile
