@@ -94,4 +94,36 @@ public class SpaceServiceImplTest {
             verify(spaceRepository).findAll();
         }
     }
+
+    @Nested
+    @DisplayName("deleteSpace()")
+    class DeleteSpaceTests {
+
+        @Test
+        @DisplayName("Should delete space by ID when it exists")
+        void shouldDeleteSpaceByIdWhenExists() {
+            Long id = 1L;
+            given(spaceRepository.existsById(id)).willReturn(true);
+
+            spaceService.deleteSpace(id);
+
+            verify(spaceRepository).existsById(id);
+            verify(spaceRepository).deleteById(id);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when space does not exist")
+        void shouldThrowExceptionWhenSpaceDoesNotExist() {
+            Long id = 99L;
+            given(spaceRepository.existsById(id)).willReturn(false);
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    RuntimeException.class,
+                    () -> spaceService.deleteSpace(id),
+                    "Space with ID " + id + " does not exist"
+            );
+
+            verify(spaceRepository).existsById(id);
+        }
+    }
 }
