@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RegisterMapper {
-    public static User dtoToEntity(RegisterRequest registerRequest) {
+    public User dtoToEntity(RegisterRequest registerRequest) {
         return User.builder()
                 .username(registerRequest.username())
                 .email(registerRequest.email())
@@ -14,7 +14,7 @@ public class RegisterMapper {
                 .role(Role.USER)
                 .build();
     }
-    public static RegisterResponse entityToDto(User user){
+    public RegisterResponse entityToDto(User user){
         return new RegisterResponse(
                 user.getUsername(),
                 user.getEmail(),

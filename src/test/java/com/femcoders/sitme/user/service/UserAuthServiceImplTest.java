@@ -7,6 +7,7 @@ import com.femcoders.sitme.user.Role;
 import com.femcoders.sitme.user.User;
 import com.femcoders.sitme.user.dtos.login.LoginRequest;
 import com.femcoders.sitme.user.dtos.login.LoginResponse;
+import com.femcoders.sitme.user.dtos.register.RegisterMapper;
 import com.femcoders.sitme.user.dtos.register.RegisterRequest;
 import com.femcoders.sitme.user.dtos.register.RegisterResponse;
 import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
@@ -73,6 +74,9 @@ public class UserAuthServiceImplTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private RegisterMapper registerMapper;
+
     @InjectMocks
     private UserAuthServiceImpl userAuthServiceImpl;
     private static Validator validator;
@@ -103,6 +107,10 @@ public class UserAuthServiceImplTest {
         when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         doNothing().when(emailService).sendRegistrationEmail(TEST_EMAIL, TEST_USERNAME);
+        when(registerMapper.dtoToEntity(any(RegisterRequest.class))).thenReturn(testUser);
+        when(registerMapper.entityToDto(any(User.class))).thenReturn(
+                new RegisterResponse(TEST_USERNAME, TEST_EMAIL, TEST_ROLE)
+        );
 
         RegisterResponse result = userAuthServiceImpl.addUser(testRegisterRequest);
 

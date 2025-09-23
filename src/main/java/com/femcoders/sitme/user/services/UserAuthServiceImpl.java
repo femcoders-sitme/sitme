@@ -35,6 +35,7 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final RegisterMapper registerMapper;
 
     @Override
     public RegisterResponse addUser(RegisterRequest registerRequest) {
@@ -47,12 +48,12 @@ public class UserAuthServiceImpl implements UserAuthService {
             throw new IdentifierAlreadyExistsException("Email already registered");
         }
 
-        User newUser = RegisterMapper.dtoToEntity(registerRequest);
+        User newUser = registerMapper.dtoToEntity(registerRequest);
         newUser.setPassword(passwordEncoder.encode(registerRequest.password()));
         User savedUser = userRepository.save(newUser);
         emailService.sendRegistrationEmail(savedUser.getEmail(), savedUser.getUsername());
 
-        return RegisterMapper.entityToDto(savedUser);
+        return registerMapper.entityToDto(savedUser);
     }
 
     @Override
