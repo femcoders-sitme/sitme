@@ -8,6 +8,7 @@ import com.femcoders.sitme.space.repository.SpaceRepository;
 import com.femcoders.sitme.space.SpaceType;
 import com.femcoders.sitme.space.dto.SpaceMapper;
 import com.femcoders.sitme.space.dto.SpaceResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class SpaceServiceImpl implements SpaceService {
                 .map(SpaceMapper::entityToDto)
                 .toList();
     }
+
     @Override
     public List<SpaceResponse> getSpacesByType(SpaceType type) {
         return spaceRepository.findByType(type)
@@ -60,6 +62,7 @@ public class SpaceServiceImpl implements SpaceService {
 
         return SpaceMapper.entityToDto(savedSpace);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest){
@@ -72,5 +75,14 @@ public class SpaceServiceImpl implements SpaceService {
         isExisting.setImageUrl(spaceRequest.imageUrl());
         Space savedSpace = spaceRepository.save(isExisting);
         return SpaceMapper.entityToDto(savedSpace);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public void deleteSpace(Long id) {
+        if (!spaceRepository.existsById(id)) {
+            throw new EntityNotFoundException("Space with ID " + id + " does not exist");
+    }
+        spaceRepository.deleteById(id);
     }
 }
