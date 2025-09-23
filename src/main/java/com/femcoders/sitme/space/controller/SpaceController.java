@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -106,5 +107,11 @@ public class SpaceController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessResponse.of("Space updated successfully", updateSpace));
+    }
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteSpace(@PathVariable Long id) {
+        spaceService.deleteSpace(id);
+        return ResponseEntity.noContent().build();
     }
 }
