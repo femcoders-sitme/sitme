@@ -96,6 +96,8 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(SpaceAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleSpaceAlreadyExists(SpaceAlreadyExistsException exception, HttpServletRequest request) {
         ErrorResponse errorResponse = buildErrorResponse(

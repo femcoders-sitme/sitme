@@ -107,7 +107,7 @@ public class UserAuthControllerIntegrationTest {
 
         RegisterRequest duplicateUsernameUser = new RegisterRequest(
                 TEST_USERNAME,
-                "different.email@fcmh.com",
+                "different.email@sitme.com",
                 TEST_PASSWORD
         );
 
@@ -178,7 +178,7 @@ public class UserAuthControllerIntegrationTest {
     @DisplayName("POST /login - should return 404 for nonexistent user")
     void login_WhenUserNotFound_ReturnsUnauthorized() throws Exception {
 
-        LoginRequest loginRequest = new LoginRequest("Nonexistent@fcmh.com", TEST_PASSWORD);
+        LoginRequest loginRequest = new LoginRequest("Nonexistent@sitme.com", TEST_PASSWORD);
 
         apiHelper.performErrorRequest(post(LOGIN_URL),
                 loginRequest,
