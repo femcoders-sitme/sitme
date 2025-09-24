@@ -9,6 +9,6 @@ import java.util.Map;
 public interface UserService {
     UserResponse getUserById(Long id);
     UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
-    UserResponse updateProfile(UserUpdateRequest request);
+    UserResponse updateProfile(Long id, UserUpdateRequest request);
     UserResponse deleteUser(Long id);
 }

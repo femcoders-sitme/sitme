@@ -34,7 +34,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Update user profile",
+    @Operation(summary = "Update user",
             description = "Allows an authenticated user to update their profile or admin to update any user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User profile updated successfully"),
@@ -53,10 +53,10 @@ public class UserController {
                 .body(SuccessResponse.of("User profile updated successfully", updatedUser));
     }
 
-    @PutMapping("/profile")
-    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/profile/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Operation(summary = "Update own profile",
-            description = "Allows an authenticated USER to update their own profile data")
+            description = "Allows an authenticated USER or ADMIN to update their own profile data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Profile updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
@@ -65,9 +65,10 @@ public class UserController {
     })
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SuccessResponse<UserResponse>> updateProfile(
+            @PathVariable Long id,
             @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
 
-        UserResponse updatedProfile = userService.updateProfile(userUpdateRequest);
+        UserResponse updatedProfile = userService.updateProfile(id, userUpdateRequest);
         return ResponseEntity.ok(SuccessResponse.of("Profile updated successfully", updatedProfile));
     }
 
