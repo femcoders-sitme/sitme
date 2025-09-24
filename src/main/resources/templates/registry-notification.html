@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Tutorials Collection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F1E9C8;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: left;
+        }
+        img {
+            width: 150px;
+        }
+        .content {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            padding: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+        }
+        .content-email {
+            background-color: #555555;
+            padding: 20px;
+        }
+        .content-email p {
+            font-size: 38px;
+            color: #FFFFFF;
+            padding: 20px;
+        }
+        footer {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        footer p {
+            text-align: left;
+            color: #383838;
+            font-size: 24px;
+        }
+         button {
+            background-color: #E20074;
+            width: 200px;
+            border-radius: 50px;
+        }
+        a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <header>
+            <img src="images/logo.jpg" alt="Logo SitMe">
+        </header>
+        <div class="content-email">
+            <p>Hello, {{username}}, your registration was successful.</p>
+        </div>
+        <footer>
+            <p>Thank you for being with us.</p>
+            <button><a href="http://localhost:8080/api/reservations">RESERVE NOW</a></button>
+        </footer>
+    </div>
+</body>
+</html>
