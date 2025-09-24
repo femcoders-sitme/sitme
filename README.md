@@ -14,10 +14,10 @@
 ## 📑 Table of Contents
 
 - [🚀 Features](#-features)
-- [🛠️ Tech Stack](#-tech-stack)
+- [🛠️ Tech Stack](#tech-stack)
 - [📋 Prerequisites](#-prerequisites)
-- [🏗️ Project Structure](#-project-structure)
-- [⚙️ Configuration](#-configuration)
+- [🏗️ Project Structure](#project-structure)
+- [⚙️ Configuration](#configuration)
 - [🚀 Getting Started](#-getting-started)
 - [🧪 Testing](#-testing)
 - [📚 API Documentation](#-api-documentation)
@@ -26,7 +26,7 @@
 - [🔄 CI/CD Pipeline](#-cicd-pipeline)
 - [📝 API Usage Examples](#-api-usage-examples)
 - [🤝 Contributing](#-contributing)
-- [👩‍💻 Team](#-team)
+- [👩‍💻 Team](#team)
 - [📄 License](#-license)
 - [🆘 Support](#-support)
 
@@ -43,11 +43,12 @@
 - **Role-based Security**: Admin and user roles with different permissions
 - **RESTful API**: Comprehensive REST endpoints with Swagger documentation
 - **Database Integration**: MySQL with JPA/Hibernate
+- **Health Checks**: Actuator endpoints to monitor application status
 - **Containerization**: Full Docker support with multi-stage builds
 
 <br>
 
-## 🛠️ Tech Stack
+<h2 id="tech-stack">🛠️ Tech Stack</h2>
 
 - **Backend**: Java 21, Spring Boot 3.5.5
 - **Database**: MySQL 8.0
@@ -71,7 +72,7 @@
 
 <br>
 
-## 🏗️ Project Structure
+<h2 id="project-structure">🏗️ Project Structure</h2>
 
 ```
 src/
@@ -90,7 +91,7 @@ src/
 
 <br>
 
-## ⚙️ Configuration
+<h2 id="configuration">⚙️ Configuration</h2>
 
 ### Environment Variables
 
@@ -222,6 +223,9 @@ The application comes with preloaded test data:
 - Password encryption with BCrypt
 - CORS configuration for API access
 
+### Observability
+- Spring Boot Actuator integration for health checks and monitoring endpoints
+
 ### Image Management
 - Cloudinary integration for image storage
 - File validation (size and format)
@@ -307,7 +311,7 @@ curl -X GET http://localhost:8080/api/spaces
 
 <br>
 
-## 👩‍💻 Team
+<h2 id="team">👩‍💻 Team</h2>
 
 - **Débora Rubio** – Team Leader and Scrum Master
 - **Lara Pla** – Product Owner
