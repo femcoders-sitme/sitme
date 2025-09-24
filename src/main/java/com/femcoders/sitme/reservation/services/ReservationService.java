@@ -2,7 +2,6 @@ package com.femcoders.sitme.reservation.services;
 
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.security.userdetails.CustomUserDetails;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
