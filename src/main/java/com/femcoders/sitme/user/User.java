@@ -1,6 +1,7 @@
 package com.femcoders.sitme.user;
 
 import com.femcoders.sitme.reservation.Reservation;
+import com.femcoders.sitme.shared.model.ImageUpdatable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor @NoArgsConstructor
 @Data
 @Builder
-public class User {
+public class User implements ImageUpdatable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +32,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    private String imageUrl;
+    private String cloudinaryImageId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -23,6 +23,8 @@ public class UserMapperImpl implements UserMapper {
                 user.getUsername(),
                 user.getEmail(),
                 user.getRole(),
+                user.getImageUrl(),
+                user.getCloudinaryImageId(),
                 user.getCreatedAt(),
                 user.getReservations()
         );
