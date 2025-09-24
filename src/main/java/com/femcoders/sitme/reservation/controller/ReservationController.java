@@ -2,6 +2,7 @@ package com.femcoders.sitme.reservation.controller;
 
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.reservation.services.ReservationServiceImpl;
+import com.femcoders.sitme.security.userdetails.CustomUserDetails;
 import com.femcoders.sitme.shared.responses.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,9 +12,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,8 +38,15 @@ public class ReservationController {
             description = "Returns a list of all registered reservations."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Reservations retrieved successfully",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReservationResponse.class))))
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservations retrieved successfully",
+                    content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = ReservationResponse.class))
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @GetMapping
     public ResponseEntity<SuccessResponse<List<ReservationResponse>>> getAllReservations() {
@@ -46,20 +57,50 @@ public class ReservationController {
                 .body(SuccessResponse.of("Reservations list retrieved successfully", reservations));
     }
 
-    @Operation(summary = "Get reservation by ID",
-            description = "Retrieve a specific reservation by its identifier")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reservation retrieved successfully"),
+    @Operation(
+            summary = "Get reservation by ID",
+            description = "Retrieve a specific reservation by its identifier"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservation retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ReservationResponse.class))
+            ),
             @ApiResponse(responseCode = "404", description = "Reservation not found")
     })
-    @Parameter(description = "Reservation's id", required = true)
     @GetMapping("/{id}")
-    public ResponseEntity<SuccessResponse<ReservationResponse>> getReservationById(@PathVariable Long id) {
+    public ResponseEntity<SuccessResponse<ReservationResponse>> getReservationById(
+            @Parameter(description = "Reservation's id", required = true)
+            @PathVariable Long id) {
 
         ReservationResponse reservation = reservationService.getReservationById(id);
 
+        return ResponseEntity.ok(SuccessResponse.of("Reservation retrieved successfully", reservation));
+    }
+
+    @Operation(
+            summary = "Get my reservations",
+            description = "Returns the list of reservations associated with the authenticated user"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservations retrieved successfully",
+                    content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = ReservationResponse.class))
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<SuccessResponse<List<ReservationResponse>>> getMyReservations(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        List<ReservationResponse> reservations = reservationService.getMyReservations(userDetails);
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(SuccessResponse.of("Reservation retrieved successfully", reservation));
+                .body(SuccessResponse.of("Reservations list retrieved successfully", reservations));
     }
 }
 
