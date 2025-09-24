@@ -53,21 +53,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToDto(updatedUser);
     }
 
-  /*  @Override
-    @Transactional
-    public UserResponse updateProfile(UserUpdateRequest request) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getUserName();
-
-        User profileUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNameNotFoundException(username));
-
-        profileUser.setUsername(request.username());
-        profileUser.setEmail(request.email());
-        profileUser.setPassword(passwordEncoder.encode(request.password()));
-
-        User updateProfile =  userRepository.save(profileUser);
-        return userMapper.entityToDto(updateProfile);
-    }*/
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @Override
   @Transactional
@@ -76,11 +61,9 @@ public class UserServiceImpl implements UserService {
       User profileUser = userRepository.findById(id)
               .orElseThrow(() -> new UsernameNotFoundException("User not found with id " + id));
 
-      // Obtener el usuario autenticado
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-      // Validación: si no es admin, solo puede actualizar su propio perfil
       if (!userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
               && !profileUser.getId().equals(userDetails.getId())) {
           throw new AccessDeniedException("You are not allowed to update this user");
@@ -92,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
       User updatedProfile = userRepository.save(profileUser);
       return userMapper.entityToDto(updatedProfile);
-  }
+    }
 
     @Override
     @Transactional

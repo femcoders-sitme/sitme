@@ -44,12 +44,11 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public UserResponse entityToDto(User user) {
-        // método estático de ReservationMapper
         List<ReservationResponse> reservationDTOs = new ArrayList<>();
 
         if (user.getReservations() != null && !user.getReservations().isEmpty()) {
             reservationDTOs = user.getReservations().stream()
-                    .map(reservation -> ReservationMapper.entityToDto(reservation)) // ← Método estático
+                    .map(reservation -> ReservationMapper.entityToDto(reservation))
                     .toList();
         }
 
@@ -58,7 +57,7 @@ public class UserMapperImpl implements UserMapper {
                 user.getEmail(),
                 user.getRole(),
                 user.getCreatedAt(),
-                reservationDTOs  // ✅ Lista de DTOs, no entidades
+                reservationDTOs
         );
     }
 }
