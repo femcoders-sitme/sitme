@@ -1,6 +1,7 @@
 package com.femcoders.sitme.space;
 
 import com.femcoders.sitme.reservation.Reservation;
+import com.femcoders.sitme.shared.model.ImageUpdatable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class Space {
+public class Space implements ImageUpdatable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,6 +35,7 @@ public class Space {
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+    private String cloudinaryImageId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
