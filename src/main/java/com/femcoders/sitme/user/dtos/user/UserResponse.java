@@ -1,6 +1,7 @@
 package com.femcoders.sitme.user.dtos.user;
 
 import com.femcoders.sitme.reservation.Reservation;
+import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.user.Role;
 
 import java.time.LocalDateTime;
@@ -11,8 +12,6 @@ public record UserResponse(
         String email,
         Role role,
         String imageUrl,
-        String cloudinaryImageUrl,
-        LocalDateTime createdAt,
-        List<Reservation> reservations
+        String cloudinaryImageUrl
 ) {
 }
