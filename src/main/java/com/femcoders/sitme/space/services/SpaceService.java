@@ -12,4 +12,5 @@ public interface SpaceService {
     SpaceResponse addSpace(SpaceRequest spaceRequest);
     SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest);
 
+    void deleteSpace(Long id);
 }

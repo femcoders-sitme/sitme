@@ -11,7 +11,7 @@ public record UserResponse(
         String username,
         String email,
         Role role,
-        LocalDateTime createdAt,
-        List<ReservationResponse> reservations
+        String imageUrl,
+        String cloudinaryImageUrl
 ) {
 }
