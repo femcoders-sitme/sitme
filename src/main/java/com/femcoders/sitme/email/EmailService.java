@@ -5,9 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -16,7 +13,6 @@ import java.util.Objects;
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
 
     public void sendRegistrationEmail(String toEmail, String username) {
         try {
