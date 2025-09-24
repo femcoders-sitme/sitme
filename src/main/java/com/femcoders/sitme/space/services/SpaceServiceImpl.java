@@ -8,7 +8,7 @@ import com.femcoders.sitme.space.repository.SpaceRepository;
 import com.femcoders.sitme.space.SpaceType;
 import com.femcoders.sitme.space.dto.SpaceMapper;
 import com.femcoders.sitme.space.dto.SpaceResponse;
-import jakarta.persistence.EntityNotFoundException;
+import com.femcoders.sitme.shared.exceptions.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -81,7 +81,7 @@ public class SpaceServiceImpl implements SpaceService {
     @Override
     public void deleteSpace(Long id) {
         if (!spaceRepository.existsById(id)) {
-            throw new EntityNotFoundException("Space with ID " + id + " does not exist");
+            throw new EntityNotFoundException("Space", id);
     }
         spaceRepository.deleteById(id);
     }
