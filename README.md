@@ -4,7 +4,7 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen?logo=springboot&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?logo=docker&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-purple?logo=githubactions&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-purple?logo=githubactions&logoColor=white)
 ![License](https://img.shields.io/badge/License-Educational-yellow)
 
 **SitMe** is a Spring Boot application for managing workspace reservations, built with modern Java technologies and containerized with Docker.
