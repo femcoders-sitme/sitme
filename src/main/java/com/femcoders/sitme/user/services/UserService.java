@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     UserResponse getUserById(Long id);
-    UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
+    UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest, MultipartFile file);
     UserResponse uploadUserImage(Long id, MultipartFile file);
     void deleteUserImage(Long id);
 }

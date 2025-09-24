@@ -1,7 +1,11 @@
 package com.femcoders.sitme.user.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.femcoders.sitme.shared.responses.SuccessResponse;
+import com.femcoders.sitme.space.dto.SpaceRequest;
+import com.femcoders.sitme.user.dtos.user.UserRequest;
 import com.femcoders.sitme.user.dtos.user.UserResponse;
 import com.femcoders.sitme.user.dtos.user.UserUpdateRequest;
 import com.femcoders.sitme.user.services.UserService;
@@ -46,7 +50,7 @@ public class UserController {
         return ResponseEntity.ok(userResponse);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update user profile",
             description = "Allows an authenticated user to update their profile or admin to update any user")
@@ -59,9 +63,13 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SuccessResponse<UserResponse>> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+            @Valid @RequestPart("user") String userJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
-        UserResponse updatedUser = userService.updateUser(id, userUpdateRequest);
+        ObjectMapper mapper = new ObjectMapper();
+        UserUpdateRequest request = mapper.readValue(userJson, UserUpdateRequest.class);
+
+        UserResponse updatedUser = userService.updateUser(id, request, file);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessResponse.of("User profile updated successfully", updatedUser));

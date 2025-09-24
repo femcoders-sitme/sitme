@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     @Transactional
-    public UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest) {
+    public UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest, MultipartFile file) {
 
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNameNotFoundException("with id " + id));
@@ -43,6 +43,11 @@ public class UserServiceImpl implements UserService {
         existingUser.setUsername(userUpdateRequest.username());
         existingUser.setEmail(userUpdateRequest.email());
         existingUser.setPassword(passwordEncoder.encode(userUpdateRequest.password()));
+
+        if (file != null && !file.isEmpty()) {
+            cloudinaryService.deleteEntityImage(existingUser);
+            cloudinaryService.uploadEntityImage(existingUser, file, "sitme/users");
+        }
 
         User updatedUser = userRepository.save(existingUser);
         return userMapper.entityToDto(updatedUser);
