@@ -1,6 +1,7 @@
 package com.femcoders.sitme.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.femcoders.sitme.email.EmailService;
 import com.femcoders.sitme.user.Role;
 import com.femcoders.sitme.user.User;
 import com.femcoders.sitme.user.dtos.login.LoginRequest;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.notNullValue;
@@ -55,6 +57,9 @@ public class UserAuthControllerIntegrationTest {
 
     @Autowired
     private UserTestHelper userTestHelper;
+
+    @MockitoBean
+    private EmailService emailService;
 
     private ApiSuccessResponseTestHelper apiHelper;
 
@@ -98,6 +103,7 @@ public class UserAuthControllerIntegrationTest {
                 TEST_PASSWORD
         );
     }
+
 
     @Test
     @DisplayName("POST /register - should return 409 when username already exists")
