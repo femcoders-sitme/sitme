@@ -1,5 +1,7 @@
 package com.femcoders.sitme.space.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.femcoders.sitme.shared.responses.SuccessResponse;
 import com.femcoders.sitme.space.SpaceType;
 import com.femcoders.sitme.space.dto.SpaceRequest;
@@ -16,7 +18,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -78,10 +82,16 @@ public class SpaceController {
             @ApiResponse(responseCode = "403", description = "User does not have ADMIN role",
                     content = @Content)
     })
-    @PostMapping
-    public ResponseEntity<SuccessResponse<SpaceResponse>> addSpace(@Valid @RequestBody SpaceRequest request) {
+    @PostMapping(consumes = "multipart/form-data")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponse<SpaceResponse>> addSpace(
+            @Valid @RequestPart("space") String spaceJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
-        SpaceResponse newSpace = spaceService.addSpace(request);
+        ObjectMapper mapper = new ObjectMapper();
+        SpaceRequest request = mapper.readValue(spaceJson, SpaceRequest.class);
+
+        SpaceResponse newSpace = spaceService.addSpace(request, file);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SuccessResponse.of("Space created successfully", newSpace));
@@ -99,12 +109,26 @@ public class SpaceController {
             @ApiResponse(responseCode = "403", description = "User does not have ADMIN role",
                     content = @Content)
     })
-    @PutMapping("/{id}")
-    public ResponseEntity<SuccessResponse<SpaceResponse>> updateSpace(@PathVariable Long id, @Valid @RequestBody SpaceRequest request) {
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponse<SpaceResponse>> updateSpace(
+            @PathVariable Long id,
+            @Valid @RequestPart("space") String spaceJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
-        SpaceResponse updateSpace = spaceService.updateSpace(id, request);
+        ObjectMapper mapper = new ObjectMapper();
+        SpaceRequest request = mapper.readValue(spaceJson, SpaceRequest.class);
+
+        SpaceResponse updateSpace = spaceService.updateSpace(id, request, file);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessResponse.of("Space updated successfully", updateSpace));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteSpace(@PathVariable Long id) {
+        spaceService.deleteSpace(id);
+        return ResponseEntity.noContent().build();
     }
 }

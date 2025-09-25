@@ -1,7 +1,11 @@
 package com.femcoders.sitme.user.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.femcoders.sitme.shared.responses.SuccessResponse;
+import com.femcoders.sitme.space.dto.SpaceRequest;
+import com.femcoders.sitme.user.dtos.user.UserRequest;
 import com.femcoders.sitme.user.dtos.user.UserResponse;
 import com.femcoders.sitme.user.dtos.user.UserUpdateRequest;
 import com.femcoders.sitme.user.services.UserService;
@@ -9,17 +13,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Users", description = "Endpoints for managing users")
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -32,9 +40,22 @@ public class UserController {
         return ResponseEntity.ok(userResponse);
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}/image")
+    @Operation(summary = "Upload profile image for a user")
+    @ApiResponse(responseCode = "200", description = "Image uploaded successfully")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<UserResponse> uploadUserImage(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file
+    ) {
+
+        UserResponse userResponse = userService.uploadUserImage(id, file);
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Update user profile",
+    @Operation(summary = "Update user",
             description = "Allows an authenticated user to update their profile or admin to update any user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User profile updated successfully"),
@@ -45,26 +66,79 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SuccessResponse<UserResponse>> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+            @Valid @RequestPart("user") String userJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
-        UserResponse updatedUser = userService.updateUser(id, userUpdateRequest);
+        ObjectMapper mapper = new ObjectMapper();
+        UserUpdateRequest request = mapper.readValue(userJson, UserUpdateRequest.class);
+
+        UserResponse updatedUser = userService.updateUser(id, request, file);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessResponse.of("User profile updated successfully", updatedUser));
+    }
+
+    @PutMapping("/profile/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Operation(summary = "Update own profile",
+            description = "Allows an authenticated USER or ADMIN to update their own profile data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<SuccessResponse<UserResponse>> updateProfile(
+            @PathVariable Long id,
+            @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+
+        UserResponse updatedProfile = userService.updateProfile(id, userUpdateRequest);
+        return ResponseEntity.ok(SuccessResponse.of("Profile updated successfully", updatedProfile));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete user", description = "Allows an admin to delete a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<SuccessResponse<Void>> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(SuccessResponse.of("User deleted successfully"));
+    }
+
+    @DeleteMapping("/{id}/image")
+    @Operation(summary = "Delete user's profile image",
+            description = "Deletes the profile image from Cloudinary and clears it in the database.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Image deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<SuccessResponse> deleteUserImage(@PathVariable Long id) {
+        userService.deleteUserImage(id);
+
+        return ResponseEntity.ok(
+                new SuccessResponse(true, "User image deleted successfully", LocalDateTime.now())
+        );
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Get all users",
-            description = "Returns a list of all users. Only accessible to admins."
+            description = "Resturns a list of all users. Only accessible to admins."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "200", description = "Users restrieved successfully"),
             @ApiResponse(responseCode = "403", description = "Forbidden (insufficient role)"),
             @ApiResponse(responseCode = "404", description = "No users found")
     })
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "bearerAuthh")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
         if (users.isEmpty()) {
@@ -72,5 +146,4 @@ public class UserController {
         }
         return ResponseEntity.ok(users);
     }
-
 }

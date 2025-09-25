@@ -43,33 +43,28 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException exception, HttpServletRequest request) {
-
         ErrorResponse error = buildErrorResponse(
                 exception.getErrorCode(),
                 exception.getMessage(),
                 HttpStatus.UNAUTHORIZED,
                 request.getRequestURI()
         );
-
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(IdentifierAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleIdentifierAlreadyExists(IdentifierAlreadyExistsException exception, HttpServletRequest request) {
-
         ErrorResponse error = buildErrorResponse(
                 exception.getErrorCode(),
                 exception.getMessage(),
                 HttpStatus.CONFLICT,
                 request.getRequestURI()
         );
-
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request) {
-
         String message = exception.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
@@ -87,14 +82,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception exception, HttpServletRequest request) {
-
         ErrorResponse error = buildErrorResponse(
                 ErrorCode.SERVER_01,
                 "Internal server error",
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 request.getRequestURI()
         );
-
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
