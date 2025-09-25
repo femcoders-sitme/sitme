@@ -9,7 +9,7 @@ import com.femcoders.sitme.space.repository.SpaceRepository;
 import com.femcoders.sitme.space.SpaceType;
 import com.femcoders.sitme.space.dto.SpaceMapper;
 import com.femcoders.sitme.space.dto.SpaceResponse;
-import jakarta.persistence.EntityNotFoundException;
+import com.femcoders.sitme.shared.exceptions.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -91,15 +91,15 @@ public class SpaceServiceImpl implements SpaceService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @Override
-    public void deleteSpace(Long id) {
-        Space spaceToDelete = spaceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Space with ID " + id + " does not exist"));
+@Override
+public void deleteSpace(Long id) {
+Space spaceToDelete = spaceRepository.findById(id)
+.orElseThrow(() -> new EntityNotFoundException("Space", id));
+if (spaceToDelete.getCloudinaryImageId() != null && !spaceToDelete.getCloudinaryImageId().isBlank()) {
+    cloudinaryService.deleteEntityImage(spaceToDelete);
+}
 
-        if (spaceToDelete.getCloudinaryImageId() != null && !spaceToDelete.getCloudinaryImageId().isBlank()) {
-            cloudinaryService.deleteEntityImage(spaceToDelete);
-        }
+spaceRepository.deleteById(id);
 
-        spaceRepository.deleteById(id);
-    }
+}
 }
