@@ -14,7 +14,7 @@ metadata:
     # Cert-manager configuration for automatic certificate management
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     # External DNS configuration for automatic DNS management
-    external-dns.alpha.kubernetes.io/hostname: dreamroute.ff5.rael.io
+    external-dns.alpha.kubernetes.io/hostname: sitme.ff5.rael.io
 spec:
   # Use LoadBalancer to expose service externally
   type: LoadBalancer
