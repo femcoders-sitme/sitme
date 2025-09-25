@@ -47,15 +47,6 @@ public class SpaceControllerIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     private String jwtToken;
-
-    @TestConfiguration
-    static class MockMailConfig {
-        @Bean
-        public JavaMailSender javaMailSender() {
-            return Mockito.mock(JavaMailSender.class);
-        }
-    }
-
     @BeforeEach
     void setUp() throws Exception {
         spaceRepository.deleteAll();
@@ -64,7 +55,7 @@ public class SpaceControllerIntegrationTest {
             User admin = User.builder()
                     .username("admin")
                     .email("admin@sitme.com")
-                    .password(passwordEncoder.encode("Password123.")) // новый пароль
+                    .password(passwordEncoder.encode("Password123."))
                     .role(Role.ADMIN)
                     .createdAt(LocalDateTime.now())
                     .build();
