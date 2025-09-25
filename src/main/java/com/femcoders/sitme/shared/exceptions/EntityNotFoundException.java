@@ -1,0 +1,14 @@
+package com.femcoders.sitme.shared.exceptions;
+
+public class EntityNotFoundException extends RuntimeException {
+    public EntityNotFoundException(String entityName, Long id) {
+        super(entityName + " not found with id " + id);
+    }
+    public EntityNotFoundException(String entityName, String value) {
+        super(entityName + " not found with " + value);
+    }
+
+    public ErrorCode getErrorCode() {
+        return ErrorCode.NOT_FOUND;
+    }
+}
