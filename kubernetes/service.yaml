@@ -1,0 +1,34 @@
+# DreamRoute Service
+# Exposes the DreamRoute application pods via a LoadBalancer with SSL termination
+apiVersion: v1
+kind: Service
+metadata:
+  name: service
+  labels:
+    tier: frontend
+  annotations:
+    # AWS Load Balancer scheme configuration
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    # AWS Load Balancer type configuration
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    # Cert-manager configuration for automatic certificate management
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # External DNS configuration for automatic DNS management
+    external-dns.alpha.kubernetes.io/hostname: dreamroute.ff5.rael.io
+spec:
+  # Use LoadBalancer to expose service externally
+  type: LoadBalancer
+  ports:
+    # HTTP port configuration
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+    # HTTPS port configuration (SSL terminated at load balancer)
+    - port: 443
+      targetPort: 8080
+      protocol: TCP
+      name: https
+  # Select pods with these labels
+  selector:
+    tier: frontend
