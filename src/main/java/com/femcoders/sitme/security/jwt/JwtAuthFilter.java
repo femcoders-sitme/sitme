@@ -21,7 +21,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthFilter  extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
@@ -37,10 +37,10 @@ public class JwtAuthFilter  extends OncePerRequestFilter {
         }
 
         String token = header.replace("Bearer ", "");
-        String username;
+        String userId;
 
         try {
-            username = jwtService.extractUsername(token);
+            userId = jwtService.extractUserId(token);
         } catch (ExpiredJwtException exception) {
             throw new ExpiredTokenException("The token has expired: " + exception.getMessage());
         } catch (MalformedJwtException exception) {
@@ -49,22 +49,22 @@ public class JwtAuthFilter  extends OncePerRequestFilter {
             throw new InvalidTokenException("Error extracting user from token: " + exception.getMessage());
         }
 
-        if (username == null && SecurityContextHolder.getContext().getAuthentication() != null) {
-            filterChain.doFilter(request, response);
-            return;
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            UserDetails userDetails = customUserDetailsService.loadUserById(Long.parseLong(userId));
+
+            if (!jwtService.isValidToken(token, userDetails)) {
+
+                throw new InvalidTokenException("Invalid token for userId: " + userId);
+            }
+
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
-
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-
-        if (!jwtService.isValidToken(token, userDetails)) {
-            throw new InvalidTokenException("Invalid token for user: " + username);
-        }
-
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         filterChain.doFilter(request, response);
     }

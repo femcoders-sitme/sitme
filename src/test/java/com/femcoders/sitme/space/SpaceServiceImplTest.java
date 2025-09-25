@@ -4,10 +4,7 @@ import com.femcoders.sitme.space.dto.SpaceMapper;
 import com.femcoders.sitme.space.dto.SpaceResponse;
 import com.femcoders.sitme.space.repository.SpaceRepository;
 import com.femcoders.sitme.space.services.SpaceServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,6 +12,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -103,11 +101,14 @@ public class SpaceServiceImplTest {
         @DisplayName("Should delete space by ID when it exists")
         void shouldDeleteSpaceByIdWhenExists() {
             Long id = 1L;
-            given(spaceRepository.existsById(id)).willReturn(true);
+            Space space = new Space();
+            space.setId(id);
+
+            given(spaceRepository.findById(id)).willReturn(Optional.of(space));
 
             spaceService.deleteSpace(id);
 
-            verify(spaceRepository).existsById(id);
+            verify(spaceRepository).findById(id);
             verify(spaceRepository).deleteById(id);
         }
 
@@ -115,15 +116,15 @@ public class SpaceServiceImplTest {
         @DisplayName("Should throw exception when space does not exist")
         void shouldThrowExceptionWhenSpaceDoesNotExist() {
             Long id = 99L;
-            given(spaceRepository.existsById(id)).willReturn(false);
+            given(spaceRepository.findById(id)).willReturn(Optional.empty());
 
-            org.junit.jupiter.api.Assertions.assertThrows(
+            Assertions.assertThrows(
                     RuntimeException.class,
                     () -> spaceService.deleteSpace(id),
                     "Space with ID " + id + " does not exist"
             );
 
-            verify(spaceRepository).existsById(id);
+            verify(spaceRepository).findById(id);
         }
     }
 }

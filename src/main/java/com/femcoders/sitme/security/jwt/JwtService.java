@@ -22,51 +22,44 @@ public class JwtService {
     private Long jwtExpiration;
 
     public String generateToken(CustomUserDetails userDetails) {
-
         return buildToken(userDetails, jwtExpiration);
     }
 
     private String buildToken(CustomUserDetails userDetails, Long jwtExpiration) {
-
         return Jwts
                 .builder()
                 .claim("role", userDetails.getAuthorities().toString())
-                .subject(userDetails.getUsername())
+                .subject(userDetails.getId().toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignKey())
                 .compact();
     }
 
-    public String extractUsername (String token) {
-
+    public String extractUserId(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    public Date extractExpiration (String token) {
-
+    public Date extractExpiration(String token) {
         return extractAllClaims(token).getExpiration();
     }
 
     public boolean isValidToken(String token, UserDetails userDetails) {
-
         try {
-            final String username = extractUsername(token);
-            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+            final String userIdFromToken = extractUserId(token);
+            CustomUserDetails customUser = (CustomUserDetails) userDetails;
+            return userIdFromToken.equals(customUser.getId().toString()) && !isTokenExpired(token);
         } catch (Exception exception) {
             return false;
         }
     }
 
     private boolean isTokenExpired(String token) {
-
         return extractExpiration(token).before(new Date());
     }
 
     private Claims extractAllClaims(String token) {
-
-        return Jwts
-                .parser()
+        return Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
                 .parseSignedClaims(token)
@@ -74,9 +67,7 @@ public class JwtService {
     }
 
     private SecretKey getSignKey() {
-
         byte[] bytes = Decoders.BASE64.decode(jwtSecretKey);
-
         return Keys.hmacShaKeyFor(bytes);
     }
 }
