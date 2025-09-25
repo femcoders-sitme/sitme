@@ -24,6 +24,13 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          envFrom:
+            - secretRef:
+                name: mail-config
+            - secretRef:
+                name: jwt-config
+            - secretRef:
+                name: cloudinary-config
           env:
             # Spring Boot profile configuration
             - name: SPRING_PROFILES_ACTIVE
