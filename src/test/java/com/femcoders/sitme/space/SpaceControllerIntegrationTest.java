@@ -8,14 +8,11 @@ import com.femcoders.sitme.user.repository.UserRepository;
 import com.femcoders.sitme.user.Role;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -117,11 +114,14 @@ public class SpaceControllerIntegrationTest {
         @Test
         void shouldCreateNewSpace() throws Exception {
             SpaceRequest request = new SpaceRequest("R-005", 4, SpaceType.ROOM, true, "https://picsum.photos/seed/roomE/600/400");
+            String requestJson = objectMapper.writeValueAsString(request);
 
-            mockMvc.perform(post("/api/spaces")
-                            .header("Authorization", jwtToken)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+            MockMultipartFile spacePart =
+                    new MockMultipartFile("space", "", "application/json", requestJson.getBytes());
+
+            mockMvc.perform(multipart("/api/spaces")
+                            .file(spacePart)
+                            .header("Authorization", jwtToken))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.message", is("Space created successfully")))
                     .andExpect(jsonPath("$.data.name", is("R-005")));
