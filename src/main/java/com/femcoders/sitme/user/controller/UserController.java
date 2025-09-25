@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -50,4 +52,25 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessResponse.of("User profile updated successfully", updatedUser));
     }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get all users",
+            description = "Returns a list of all users. Only accessible to admins."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden (insufficient role)"),
+            @ApiResponse(responseCode = "404", description = "No users found")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
+        if (users.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(users);
+    }
+
 }
