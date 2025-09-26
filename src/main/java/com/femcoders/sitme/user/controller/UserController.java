@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -124,5 +125,25 @@ public class UserController {
         return ResponseEntity.ok(
                 new SuccessResponse(true, "User image deleted successfully", LocalDateTime.now())
         );
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get all users",
+            description = "Resturns a list of all users. Only accessible to admins."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Users restrieved successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden (insufficient role)"),
+            @ApiResponse(responseCode = "404", description = "No users found")
+    })
+    @SecurityRequirement(name = "bearerAuthh")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
+        if (users.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(users);
     }
 }
