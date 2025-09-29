@@ -1,8 +1,6 @@
 package com.femcoders.sitme.reservation.dtos;
 
 import com.femcoders.sitme.reservation.Reservation;
-import com.femcoders.sitme.reservation.Status;
-import com.femcoders.sitme.reservation.TimeSlot;
 import com.femcoders.sitme.space.Space;
 import com.femcoders.sitme.user.User;
 
@@ -12,7 +10,6 @@ public class ReservationMapper {
         return Reservation.builder()
                 .reservationDate(request.reservationDate())
                 .timeSlot(request.timeSlot())
-                .status(Status.ACTIVE)
                 .emailSent(false)
                 .user(user)
                 .space(space)
@@ -23,7 +20,6 @@ public class ReservationMapper {
         return new ReservationResponse(
                 reservation.getReservationDate(),
                 reservation.getTimeSlot(),
-                reservation.getStatus(),
                 reservation.isEmailSent(),
                 reservation.getCreatedAt(),
                 reservation.getUser().getId(),

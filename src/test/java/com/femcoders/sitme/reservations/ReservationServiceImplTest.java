@@ -51,8 +51,6 @@ public class ReservationServiceImplTest {
     private static final LocalDate TEST_ANOTHER_RESERVATION_DATE = LocalDate.of(2024, 12, 26);
     private static final TimeSlot TEST_TIME_SLOT = TimeSlot.MORNING;
     private static final TimeSlot TEST_ANOTHER_TIME_SLOT = TimeSlot.AFTERNOON;
-    private static final Status TEST_STATUS = Status.ACTIVE;
-    private static final Status TEST_ANOTHER_STATUS = Status.COMPLETED;
     private static final boolean TEST_EMAIL_SENT = true;
     private static final boolean TEST_ANOTHER_EMAIL_SENT = false;
 
@@ -105,7 +103,6 @@ public class ReservationServiceImplTest {
 
             assertEquals(testReservation.getReservationDate(), result.getFirst().reservationDate());
             assertEquals(testReservation.getTimeSlot(), result.getFirst().timeSlot());
-            assertEquals(testReservation.getStatus(), result.getFirst().status());
             assertEquals(testReservation.isEmailSent(), result.getFirst().emailSent());
             assertEquals(testReservation.getCreatedAt(), result.getFirst().createdAt());
             assertEquals(testReservation.getUser().getId(), result.getFirst().userId());
@@ -115,7 +112,6 @@ public class ReservationServiceImplTest {
 
             assertEquals(secondTestReservation.getReservationDate(), result.get(1).reservationDate());
             assertEquals(secondTestReservation.getTimeSlot(), result.get(1).timeSlot());
-            assertEquals(secondTestReservation.getStatus(), result.get(1).status());
             assertEquals(secondTestReservation.isEmailSent(), result.get(1).emailSent());
             assertEquals(secondTestReservation.getCreatedAt(), result.get(1).createdAt());
             assertEquals(secondTestReservation.getUser().getId(), result.get(1).userId());
@@ -167,7 +163,6 @@ public class ReservationServiceImplTest {
             assertNotNull(result);
             assertEquals(testReservation.getReservationDate(), result.reservationDate());
             assertEquals(testReservation.getTimeSlot(), result.timeSlot());
-            assertEquals(testReservation.getStatus(), result.status());
             assertEquals(testReservation.isEmailSent(), result.emailSent());
             assertEquals(testReservation.getCreatedAt(), result.createdAt());
             assertEquals(testReservation.getUser().getId(), result.userId());
@@ -239,7 +234,6 @@ public class ReservationServiceImplTest {
                 .id(TEST_RESERVATION_ID)
                 .reservationDate(TEST_RESERVATION_DATE)
                 .timeSlot(TEST_TIME_SLOT)
-                .status(TEST_STATUS)
                 .emailSent(TEST_EMAIL_SENT)
                 .createdAt(TEST_CREATED_AT)
                 .user(testUser)
@@ -252,7 +246,6 @@ public class ReservationServiceImplTest {
                 .id(TEST_ANOTHER_RESERVATION_ID)
                 .reservationDate(TEST_ANOTHER_RESERVATION_DATE)
                 .timeSlot(TEST_ANOTHER_TIME_SLOT)
-                .status(TEST_ANOTHER_STATUS)
                 .emailSent(TEST_ANOTHER_EMAIL_SENT)
                 .createdAt(TEST_ANOTHER_CREATED_AT)
                 .user(secondTestUser)

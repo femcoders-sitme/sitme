@@ -30,10 +30,6 @@ public class Reservation {
     @Column(name = "time_slot", nullable = false)
     private TimeSlot timeSlot;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status;
-
     @Column(name = "email_sent", nullable = false)
     private boolean emailSent;
 
