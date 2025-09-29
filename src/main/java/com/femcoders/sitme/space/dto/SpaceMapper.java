@@ -18,6 +18,7 @@ public class SpaceMapper {
         if (space == null) return null;
 
         return new SpaceResponse(
+                space.getId(),
                 space.getName(),
                 space.getCapacity(),
                 space.getType().name(),
