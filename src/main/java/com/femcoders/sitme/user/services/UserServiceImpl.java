@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateProfile(Long id, UserUpdateRequest request) {
 
         User profileUser = userRepository.findById(id)
-          .orElseThrow(() -> new UsernameNotFoundException("User not found with id " + id));
+          .orElseThrow(() -> new EntityNotFoundException("User", id));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
