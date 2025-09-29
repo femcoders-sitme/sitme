@@ -11,6 +11,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - configmap.yaml
+  - mailhog.yaml
 
 # Image customization - override image tags
 images:
