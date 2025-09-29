@@ -4,7 +4,6 @@ public record SpaceResponse(
         String name,
         Integer capacity,
         String type,
-        Boolean available,
         String imageUrl
 ) {
 }

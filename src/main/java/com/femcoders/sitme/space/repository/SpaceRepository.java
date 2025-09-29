@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface SpaceRepository extends JpaRepository<Space, Long> {
     List<Space> findByType(SpaceType type);
-    List<Space> findByIsAvailableTrue();
     boolean existsByName(String name);
 }

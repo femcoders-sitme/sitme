@@ -40,14 +40,6 @@ public class SpaceServiceImpl implements SpaceService {
                 .toList();
     }
 
-    @Override
-    public List<SpaceResponse> getAvailableSpaces() {
-        return spaceRepository.findByIsAvailableTrue()
-                .stream()
-                .map(SpaceMapper::entityToDto)
-                .toList();
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public SpaceResponse addSpace(SpaceRequest spaceRequest, MultipartFile file) {
@@ -76,10 +68,10 @@ public class SpaceServiceImpl implements SpaceService {
     public SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest, MultipartFile file){
         Space isExisting = spaceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Not exists by id: " + id));
+
         isExisting.setName(spaceRequest.name());
         isExisting.setCapacity(spaceRequest.capacity());
         isExisting.setType(spaceRequest.type());
-        isExisting.setIsAvailable(spaceRequest.isAvailable());
 
         if (file != null && !file.isEmpty()) {
             cloudinaryService.deleteEntityImage(isExisting);
@@ -91,15 +83,15 @@ public class SpaceServiceImpl implements SpaceService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-@Override
-public void deleteSpace(Long id) {
-Space spaceToDelete = spaceRepository.findById(id)
-.orElseThrow(() -> new EntityNotFoundException("Space", id));
-if (spaceToDelete.getCloudinaryImageId() != null && !spaceToDelete.getCloudinaryImageId().isBlank()) {
-    cloudinaryService.deleteEntityImage(spaceToDelete);
-}
+    @Override
+    public void deleteSpace(Long id) {
+        Space spaceToDelete = spaceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Space", id));
+        if (spaceToDelete.getCloudinaryImageId() != null && !spaceToDelete.getCloudinaryImageId().isBlank()) {
+            cloudinaryService.deleteEntityImage(spaceToDelete);
+        }
 
-spaceRepository.deleteById(id);
+        spaceRepository.deleteById(id);
 
-}
+    }
 }

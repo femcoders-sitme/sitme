@@ -10,7 +10,6 @@ import java.util.List;
 public interface SpaceService {
     List<SpaceResponse> getAllSpaces();
     List<SpaceResponse> getSpacesByType(SpaceType type);
-    List<SpaceResponse> getAvailableSpaces();
     SpaceResponse addSpace(SpaceRequest spaceRequest, MultipartFile file);
     SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest, MultipartFile file);
     void deleteSpace(Long id);

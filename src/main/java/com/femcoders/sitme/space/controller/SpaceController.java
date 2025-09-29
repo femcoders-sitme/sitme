@@ -58,19 +58,6 @@ public class SpaceController {
     }
 
     @Operation(
-            summary = "Filter available spaces",
-            description = "Returns only spaces that are currently available."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Available spaces retrieved successfully",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceResponse.class))))
-    })
-    @GetMapping("/filter/available")
-    public ResponseEntity<List<SpaceResponse>> getAvailableSpaces() {
-        return ResponseEntity.ok(spaceService.getAvailableSpaces());
-    }
-
-    @Operation(
             summary = "Create a new space",
             description = "Adds a new space to the system. Only users with ADMIN role can perform this action."
     )
