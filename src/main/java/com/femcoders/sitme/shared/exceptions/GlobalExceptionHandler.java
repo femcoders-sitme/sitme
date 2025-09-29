@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
                 .orElse("Invalid input");
 
         ErrorResponse error = buildErrorResponse(
-                ErrorCode.VALIDATION_01,
+                ErrorCode.VALIDATION_ERROR,
                 message,
                 HttpStatus.BAD_REQUEST,
                 request.getRequestURI()

@@ -8,6 +8,6 @@ public class IdentifierAlreadyExistsException extends RuntimeException {
     }
 
     public ErrorCode getErrorCode() {
-        return ErrorCode.AUTH_03;
+        return ErrorCode.AUTH_02;
     }
 }
