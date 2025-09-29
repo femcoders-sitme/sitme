@@ -48,4 +48,21 @@ public class ReservationServiceImpl implements ReservationService {
                 .map(ReservationMapper::entityToDto)
                 .toList();
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Override
+    public void deleteReservation(Long id, CustomUserDetails userDetails) {
+
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !reservation.getUser().getId().equals(userDetails.getId())) {
+            throw new RuntimeException("You are not allowed to delete this reservation");
+        }
+
+        reservationsRepository.delete(reservation);
+    }
 }
