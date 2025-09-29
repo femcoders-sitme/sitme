@@ -30,9 +30,6 @@ public class Space implements ImageUpdatable {
     @Column(nullable = false, length = 20)
     private SpaceType type;
 
-    @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable;
-
     @Column(name = "image_url", length = 500)
     private String imageUrl;
     private String cloudinaryImageId;
