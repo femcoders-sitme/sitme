@@ -40,7 +40,6 @@ public class SpaceServiceImplTest {
                 .name("R-001")
                 .capacity(8)
                 .type(SpaceType.ROOM)
-                .isAvailable(true)
                 .imageUrl("https://picsum.photos/seed/roomA/600/400")
                 .build();
 
@@ -49,12 +48,11 @@ public class SpaceServiceImplTest {
                 .name("T-001")
                 .capacity(2)
                 .type(SpaceType.TABLE)
-                .isAvailable(true)
                 .imageUrl("https://picsum.photos/seed/table01/600/400")
                 .build();
 
-        response1 = new SpaceResponse("R-001", 8, "ROOM", true, "https://picsum.photos/seed/roomA/600/400");
-        response2 = new SpaceResponse("T-001", 2, "TABLE", true, "https://picsum.photos/seed/table01/600/400");
+        response1 = new SpaceResponse("R-001", 8, "ROOM",  "https://picsum.photos/seed/roomA/600/400");
+        response2 = new SpaceResponse("T-001", 2, "TABLE", "https://picsum.photos/seed/table01/600/400");
     }
 
     @Nested
