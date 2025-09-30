@@ -11,6 +11,7 @@ import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryService cloudinaryService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Override
     public UserResponse getMyProfile(CustomUserDetails userDetails) {
 
@@ -33,6 +35,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         return UserMapper.entityToDto(userProfile);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Override
     @Transactional
     public UserResponse updateMyProfile(CustomUserDetails userDetails, UserRequest userRequest, MultipartFile file) {
