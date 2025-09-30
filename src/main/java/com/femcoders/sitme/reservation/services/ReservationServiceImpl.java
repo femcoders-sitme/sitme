@@ -58,7 +58,6 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
-    @PreAuthorize("hasRole('USER')")
     @Override
     public ReservationResponse createReservation(ReservationRequest reservationRequest, CustomUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getId())
