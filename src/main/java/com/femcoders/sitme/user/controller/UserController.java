@@ -31,7 +31,6 @@ public class UserController {
 
     private final UserService userService;
 
-    // GET ALL
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
@@ -51,7 +50,6 @@ public class UserController {
                 .body(SuccessResponse.of("Users list retrieved successfully", users));
     }
 
-    // GET USER BY ID
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
@@ -73,7 +71,6 @@ public class UserController {
                 .body(SuccessResponse.of("User profile retrieved successfully", userResponse));
     }
 
-    // UPDATE USER
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update user",
@@ -91,6 +88,7 @@ public class UserController {
             @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
+
         UserRequest request = mapper.readValue(userJson, UserRequest.class);
 
         UserResponse updatedUser = userService.updateUser(id, request, file);
@@ -99,7 +97,6 @@ public class UserController {
                 .body(SuccessResponse.of("User profile updated successfully", updatedUser));
     }
 
-    // UPLOAD IMAGE
     @PostMapping("/{id}/image")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Upload profile image for a user")
