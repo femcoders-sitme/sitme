@@ -2,6 +2,7 @@ package com.femcoders.sitme.reservation.services;
 
 import com.femcoders.sitme.email.EmailService;
 import com.femcoders.sitme.reservation.Reservation;
+import com.femcoders.sitme.reservation.TimeSlot;
 import com.femcoders.sitme.reservation.dtos.ReservationMapper;
 import com.femcoders.sitme.reservation.dtos.ReservationRequest;
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
@@ -18,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -58,15 +60,6 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @Override
-    public void deleteReservation(Long id) {
-        Reservation reservation = reservationsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
-
-        reservationsRepository.delete(reservation);
-     } 
-
     @Override
     public ReservationResponse createReservation(ReservationRequest reservationRequest, CustomUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getId())
@@ -85,5 +78,48 @@ public class ReservationServiceImpl implements ReservationService {
                 reservationSaved.getTimeSlot().name());
 
         return ReservationMapper.entityToDto(reservationSaved);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public void deleteReservation(Long id) {
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        reservationsRepository.delete(reservation);
+    }
+
+    @Override
+    public boolean isReservationAvailable(ReservationRequest reservationRequest){
+        List<Reservation> existingReservations = reservationsRepository.findByReservationDateAndSpaceId(
+                reservationRequest.reservationDate(),
+                reservationRequest.spaceId());
+
+        if (existingReservations.isEmpty()) {
+            return true;
+        }
+
+        for (Reservation existingReservation : existingReservations) {
+
+            if (reservationRequest.timeSlot() == TimeSlot.FULL_DAY &&
+                    (existingReservation.getTimeSlot() == TimeSlot.MORNING || existingReservation.getTimeSlot() == TimeSlot.AFTERNOON)) {
+                return false;
+            }
+
+            if ((reservationRequest.timeSlot() == TimeSlot.MORNING || reservationRequest.timeSlot() == TimeSlot.AFTERNOON)
+                    && existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (reservationRequest.timeSlot() == existingReservation.getTimeSlot()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
