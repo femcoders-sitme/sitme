@@ -14,7 +14,7 @@ import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
 import com.femcoders.sitme.user.exceptions.InvalidCredentialsException;
 import com.femcoders.sitme.user.exceptions.UserNameNotFoundException;
 import com.femcoders.sitme.user.repository.UserRepository;
-import com.femcoders.sitme.user.services.UserAuthServiceImpl;
+import com.femcoders.sitme.user.services.auth.UserAuthServiceImpl;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -34,7 +34,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Set;

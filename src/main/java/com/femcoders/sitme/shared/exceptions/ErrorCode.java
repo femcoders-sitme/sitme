@@ -1,18 +1,19 @@
 package com.femcoders.sitme.shared.exceptions;
 
 public enum ErrorCode {
-    AUTH_01, // User not found
-    AUTH_02, // Invalid credentials
-    AUTH_03, // Email or username already registered
-    AUTH_04, // Invalid token
-    AUTH_05, // Expired token
 
     NOT_FOUND, // Entity not found
 
-    VALIDATION_01, //Validation error
+    AUTH_01, // Invalid credentials
+    AUTH_02, // Email or username already registered
+    AUTH_03, // Invalid token
+    AUTH_04, // Expired token
+    AUTH_05, // Access denied
+    AUTH_06, // Authentication general error
 
-    SPACE_01, // Space not found
-    SPACE_02, // Space already exists
+    VALIDATION_ERROR, //Validation error
+
+    SPACE_01, // Space already exists
 
     RESERVATION_01, // Invalid reservation request
     RESERVATION_02, // Reservation request not found

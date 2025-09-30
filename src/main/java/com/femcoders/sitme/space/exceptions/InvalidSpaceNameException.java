@@ -8,6 +8,6 @@ public class InvalidSpaceNameException extends RuntimeException {
     }
 
     public ErrorCode getErrorCode() {
-        return ErrorCode.VALIDATION_01;
+        return ErrorCode.VALIDATION_ERROR;
     }
 }

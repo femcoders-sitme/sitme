@@ -10,7 +10,6 @@ public class SpaceMapper {
                 .name(request.name())
                 .capacity(request.capacity())
                 .type(request.type())
-                .isAvailable(request.isAvailable() != null ? request.isAvailable() : true)
                 .imageUrl(request.imageUrl())
                 .build();
     }
@@ -19,10 +18,10 @@ public class SpaceMapper {
         if (space == null) return null;
 
         return new SpaceResponse(
+                space.getId(),
                 space.getName(),
                 space.getCapacity(),
                 space.getType().name(),
-                space.getIsAvailable(),
                 space.getImageUrl()
         );
     }

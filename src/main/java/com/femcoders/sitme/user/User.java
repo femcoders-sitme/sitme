@@ -35,6 +35,8 @@ public class User implements ImageUpdatable {
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+
+    @Column(name = "cloudinary_image_id")
     private String cloudinaryImageId;
 
     @CreationTimestamp

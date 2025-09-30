@@ -119,7 +119,7 @@ public class UserAuthControllerIntegrationTest {
 
         apiHelper.performErrorRequest(post(REGISTER_URL),
                 duplicateUsernameUser,
-                "AUTH_03",
+                "AUTH_02",
                 409,
                 "Username already exists"
         );
@@ -137,7 +137,7 @@ public class UserAuthControllerIntegrationTest {
 
         apiHelper.performErrorRequest(post(REGISTER_URL),
                 invalidEmailUser,
-                "VALIDATION_01",
+                "VALIDATION_ERROR",
                 400,
                 "Email is not valid"
         );
@@ -155,7 +155,7 @@ public class UserAuthControllerIntegrationTest {
 
         apiHelper.performErrorRequest(post(REGISTER_URL),
                 weakPasswordUser,
-                "VALIDATION_01",
+                "VALIDATION_ERROR",
                 400,
                 "Password must contain a minimum of 12 characters, including a number, one uppercase letter, one lowercase letter and one special character"
         );
@@ -204,7 +204,7 @@ public class UserAuthControllerIntegrationTest {
 
         apiHelper.performErrorRequest(post(LOGIN_URL),
                 loginRequest,
-                "AUTH_02",
+                "AUTH_01",
                 401,
                 "Invalid credentials"
         );
@@ -218,7 +218,7 @@ public class UserAuthControllerIntegrationTest {
 
         apiHelper.performErrorRequest(post(LOGIN_URL),
                 loginRequest,
-                "VALIDATION_01",
+                "VALIDATION_ERROR",
                 400,
                 "Username or e-mail is required"
         );
@@ -232,7 +232,7 @@ public class UserAuthControllerIntegrationTest {
 
         apiHelper.performErrorRequest(post(LOGIN_URL),
                 loginRequest,
-                "VALIDATION_01",
+                "VALIDATION_ERROR",
                 400,
                 "Password is required"
         );

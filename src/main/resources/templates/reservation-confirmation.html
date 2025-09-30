@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Boot Tutorials Collection</title>
+    <title>Reservation Confirmation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,9 +30,9 @@
             padding: 20px;
         }
         .content-email p {
-            font-size: 38px;
+            font-size: 28px;
             color: #FFFFFF;
-            padding: 20px;
+            padding: 10px 20px;
         }
         footer {
             padding: 20px;
@@ -42,12 +42,14 @@
         footer p {
             text-align: left;
             color: #383838;
-            font-size: 24px;
+            font-size: 18px;
         }
-         button {
+        button {
             background-color: #E20074;
             width: 200px;
             border-radius: 50px;
+            border: none;
+            padding: 10px;
         }
         a {
             color: #ffffff;
@@ -57,17 +59,20 @@
     </style>
 </head>
 <body>
-    <div class="content">
-        <header>
-            <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="Logo SitMe">
-        </header>
-        <div class="content-email">
-            <p>Hello, {{username}}, your registration was successful.</p>
-        </div>
-        <footer>
-            <p>Thank you for being with us.</p>
-            <button><a href="{{frontendUrl}}/spaces">RESERVE NOW</a></button>
-        </footer>
+<div class="content">
+    <header>
+        <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="Logo SitMe">
+    </header>
+    <div class="content-email">
+        <p>Hello, {{username}}, your reservation has been confirmed.</p>
+        <p><strong>Space:</strong> {{spaceName}}</p>
+        <p><strong>Date:</strong> {{date}}</p>
+        <p><strong>Time:</strong> {{timeSlot}}</p>
     </div>
+    <footer>
+        <p>We look forward to seeing you!</p>
+        <button><a href="{{frontendUrl}}/reservations">VIEW MY RESERVATIONS</a></button>
+    </footer>
+</div>
 </body>
 </html>

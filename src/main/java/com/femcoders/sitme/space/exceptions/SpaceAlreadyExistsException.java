@@ -8,7 +8,7 @@ public class SpaceAlreadyExistsException extends RuntimeException {
     }
 
     public ErrorCode getErrorCode() {
-        return ErrorCode.SPACE_02;
+        return ErrorCode.SPACE_01;
     }
 }
 
