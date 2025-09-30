@@ -10,5 +10,9 @@ public interface ReservationService {
     List<ReservationResponse> getAllReservations();
     ReservationResponse getReservationById(Long id);
     List<ReservationResponse> getMyReservations(CustomUserDetails userDetails);
+
+    void deleteReservation(Long id);
+
     ReservationResponse createReservation(ReservationRequest reservationRequest, CustomUserDetails userDetails);
+
 }

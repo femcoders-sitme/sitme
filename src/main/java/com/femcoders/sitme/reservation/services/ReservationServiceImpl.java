@@ -58,6 +58,15 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public void deleteReservation(Long id) {
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        reservationsRepository.delete(reservation);
+     } 
+
     @Override
     public ReservationResponse createReservation(ReservationRequest reservationRequest, CustomUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getId())
