@@ -1,5 +1,6 @@
 package com.femcoders.sitme.reservation.controller;
 
+import com.femcoders.sitme.reservation.dtos.ReservationRequest;
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.reservation.services.ReservationServiceImpl;
 import com.femcoders.sitme.security.userdetails.CustomUserDetails;
@@ -12,7 +13,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -90,7 +93,8 @@ public class ReservationController {
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @GetMapping("/me")
-    public ResponseEntity<SuccessResponse<List<ReservationResponse>>> getMyReservations(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<SuccessResponse<List<ReservationResponse>>> getMyReservations(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         List<ReservationResponse> reservations = reservationService.getMyReservations(userDetails);
 
@@ -117,8 +121,47 @@ public class ReservationController {
             @Parameter(description = "Reservation ID to delete", required = true)
             @PathVariable Long id) {
 
-        reservationService.deleteReservation(id); // без userDetails
+        reservationService.deleteReservation(id); 
         return ResponseEntity.ok(SuccessResponse.of("Reservation deleted successfully", null));
+     }
+
+    @Operation(
+            summary = "Create a reservation",
+            description = "Creates a new reservation associated with the authenticated user. " +
+                    "The reservation will be stored with status ACTIVE by default and emailSent set to false."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Reservation created successfully",
+                    content = @Content(schema = @Schema(implementation = ReservationResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error (e.g., past date or missing required fields)"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthenticated - missing or invalid JWT"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User or Space not found"
+            )
+    })
+    @PostMapping
+    public ResponseEntity<SuccessResponse<ReservationResponse>> createReservation (
+            @Valid @RequestBody ReservationRequest reservationRequest,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        ReservationResponse reservationNew = reservationService.createReservation(reservationRequest, userDetails);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(SuccessResponse.of("Reservation created successfully", reservationNew));
     }
 }
 

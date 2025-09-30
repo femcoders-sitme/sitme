@@ -40,6 +40,14 @@ public class SpaceServiceImpl implements SpaceService {
                 .toList();
     }
 
+    @Override
+    public SpaceResponse getSpaceById(Long id) {
+        Space space = spaceRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException(Space.class.getSimpleName(), id));
+
+        return SpaceMapper.entityToDto(space);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public SpaceResponse addSpace(SpaceRequest spaceRequest, MultipartFile file) {

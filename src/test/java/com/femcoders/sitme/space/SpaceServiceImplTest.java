@@ -51,8 +51,8 @@ public class SpaceServiceImplTest {
                 .imageUrl("https://picsum.photos/seed/table01/600/400")
                 .build();
 
-        response1 = new SpaceResponse("R-001", 8, "ROOM",  "https://picsum.photos/seed/roomA/600/400");
-        response2 = new SpaceResponse("T-001", 2, "TABLE", "https://picsum.photos/seed/table01/600/400");
+        response1 = new SpaceResponse(1L, "R-001", 8, "ROOM",  "https://picsum.photos/seed/roomA/600/400");
+        response2 = new SpaceResponse(2L, "T-001", 2, "TABLE", "https://picsum.photos/seed/table01/600/400");
     }
 
     @Nested

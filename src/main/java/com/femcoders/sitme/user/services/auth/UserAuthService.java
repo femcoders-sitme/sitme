@@ -1,4 +1,4 @@
-package com.femcoders.sitme.user.services;
+package com.femcoders.sitme.user.services.auth;
 
 import com.femcoders.sitme.user.dtos.login.LoginRequest;
 import com.femcoders.sitme.user.dtos.login.LoginResponse;
