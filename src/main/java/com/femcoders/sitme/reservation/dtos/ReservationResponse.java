@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record ReservationResponse(
+        Long id,
         LocalDate reservationDate,
         TimeSlot timeSlot,
         Status status,
