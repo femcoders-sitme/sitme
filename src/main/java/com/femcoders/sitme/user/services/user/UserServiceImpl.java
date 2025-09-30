@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryService cloudinaryService;
 
+
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public List<UserResponse> getAllUsers() {
@@ -99,23 +100,6 @@ public class UserServiceImpl implements UserService {
         cloudinaryService.deleteEntityImage(user);
 
         userRepository.save(user);
-    }
-
-    @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(User.class.getSimpleName(), id));
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(UserMapper::entityToDto)
-                .collect(Collectors.toList());
     }
 }
 
