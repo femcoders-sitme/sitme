@@ -5,7 +5,7 @@ import com.femcoders.sitme.user.dtos.login.LoginRequest;
 import com.femcoders.sitme.user.dtos.login.LoginResponse;
 import com.femcoders.sitme.user.dtos.register.RegisterRequest;
 import com.femcoders.sitme.user.dtos.register.RegisterResponse;
-import com.femcoders.sitme.user.services.UserAuthServiceImpl;
+import com.femcoders.sitme.user.services.auth.UserAuthServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
