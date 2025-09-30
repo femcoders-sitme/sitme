@@ -98,12 +98,26 @@ public class ReservationController {
                 .body(SuccessResponse.of("Reservations list retrieved successfully", reservations));
     }
 
+    @Operation(
+            summary = "Delete reservation",
+            description = "Deletes a reservation by its ID. Only admins can perform this action."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservation deleted successfully",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Reservation not found")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<SuccessResponse<String>> deleteReservation(
-            @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @Parameter(description = "Reservation ID to delete", required = true)
+            @PathVariable Long id) {
 
-        reservationService.deleteReservation(id, userDetails);
+        reservationService.deleteReservation(id); // без userDetails
         return ResponseEntity.ok(SuccessResponse.of("Reservation deleted successfully", null));
     }
 }

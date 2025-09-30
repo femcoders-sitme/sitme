@@ -49,19 +49,11 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
-    public void deleteReservation(Long id, CustomUserDetails userDetails) {
-
+    public void deleteReservation(Long id) {
         Reservation reservation = reservationsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
-
-        boolean isAdmin = userDetails.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!isAdmin && !reservation.getUser().getId().equals(userDetails.getId())) {
-            throw new RuntimeException("You are not allowed to delete this reservation");
-        }
 
         reservationsRepository.delete(reservation);
     }
