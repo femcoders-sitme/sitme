@@ -8,6 +8,8 @@ public enum ErrorCode {
     AUTH_02, // Email or username already registered
     AUTH_03, // Invalid token
     AUTH_04, // Expired token
+    AUTH_05, // Access denied
+    AUTH_06, // Authentication general error
 
     VALIDATION_ERROR, //Validation error
 
