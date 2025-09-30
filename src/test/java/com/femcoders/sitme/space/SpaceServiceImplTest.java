@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -160,6 +162,77 @@ public class SpaceServiceImplTest {
             verify(spaceRepository).existsByName(request1.name());
             verify(spaceRepository, never()).save(any());
             verify(cloudinaryService, never()).uploadEntityImage(any(), any(), any());
+        }
+    }
+
+    @Nested
+    @DisplayName("updateSpace()")
+    class UpdateSpaceTests {
+        @Test
+        void updateSpaceTest_withFile() throws Exception {
+
+            Long id = 1L;
+
+            MultipartFile mockFile = new MockMultipartFile(
+                    "file",
+                    "test.jpg",
+                    MediaType.IMAGE_JPEG_VALUE,
+                    "Dummy Image Content".getBytes()
+            );
+
+            Space updatedSpace = new Space();
+            updatedSpace.setId(id);
+            updatedSpace.setName(updateRequest1.name());
+            updatedSpace.setCapacity(updateRequest1.capacity());
+            updatedSpace.setType(updateRequest1.type());
+            updatedSpace.setImageUrl(updateRequest1.imageUrl());
+
+            when(spaceRepository.findById(id)).thenReturn(Optional.of(space1));
+            when(spaceRepository.save(any(Space.class))).thenReturn(updatedSpace);
+            when(SpaceMapper.entityToDto(updatedSpace)).thenReturn(updateResponse1);
+
+            SpaceResponse response = spaceService.updateSpace(id, updateRequest1, mockFile);
+
+            verify(cloudinaryService).deleteEntityImage(space1);
+            verify(cloudinaryService).uploadEntityImage(space1, mockFile, "sitme/spaces");
+            verify(spaceRepository).save(space1);
+            assertEquals(updateResponse1, response);
+        }
+
+        @Test
+        void updateSpaceTest_withoutFile() {
+
+            Long id = 1L;
+
+            Space updatedSpace = new Space();
+            updatedSpace.setId(id);
+            updatedSpace.setName(updateRequest1.name());
+            updatedSpace.setCapacity(updateRequest1.capacity());
+            updatedSpace.setType(updateRequest1.type());
+
+            when(spaceRepository.findById(id)).thenReturn(Optional.of(space1));
+            when(spaceRepository.save(any(Space.class))).thenReturn(updatedSpace);
+            when(SpaceMapper.entityToDto(updatedSpace)).thenReturn(updateResponse1);
+
+            SpaceResponse response = spaceService.updateSpace(id, updateRequest1, null);
+
+            verify(cloudinaryService, never()).deleteEntityImage(any());
+            verify(cloudinaryService, never()).uploadEntityImage(any(), any(), anyString());
+            verify(spaceRepository).save(space1);
+            assertEquals(updateResponse1, response);
+        }
+
+        @Test
+        void updateSpaceTest_notFound() {
+
+            Long id = 99L;
+
+            when(spaceRepository.findById(id)).thenReturn(Optional.empty());
+
+            RuntimeException exception = assertThrows(RuntimeException.class,
+                    () -> spaceService.updateSpace(id, updateRequest1, null));
+
+            assertEquals("Not exists by id: " + id, exception.getMessage());
         }
     }
 
