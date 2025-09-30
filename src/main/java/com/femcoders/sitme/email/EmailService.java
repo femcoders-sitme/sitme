@@ -2,6 +2,7 @@ package com.femcoders.sitme.email;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,9 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     public void sendRegistrationEmail(String toEmail, String username) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -23,7 +27,8 @@ public class EmailService {
             helper.setSubject("Successful registration | from SitMe");
             try(var inputStream = Objects.requireNonNull(EmailService.class.getResourceAsStream("/templates/registry-notification.html"))){
                 String html = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                html = html.replace("{{username}}", username);
+                html = html.replace("{{username}}", username)
+                        .replace("{{frontendUrl}}", frontendUrl);
                 helper.setText(html, true);
             }
             mailSender.send(message);
@@ -31,4 +36,29 @@ public class EmailService {
             throw new RuntimeException(e);
         }
     }
+
+    public void sendReservationConfirmationEmail(String toEmail, String username, String spaceName, String date, String timeSlot) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("noreply@sitmeapp.com");
+            helper.setTo(toEmail);
+            helper.setSubject("Reservation confirmed | SitMe");
+
+            try (var inputStream = Objects.requireNonNull(
+                    EmailService.class.getResourceAsStream("/templates/reservation-confirmation.html"))) {
+                String html = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                html = html.replace("{{username}}", username)
+                        .replace("{{spaceName}}", spaceName)
+                        .replace("{{date}}", date)
+                        .replace("{{timeSlot}}", timeSlot)
+                        .replace("{{frontendUrl}}", frontendUrl);
+                helper.setText(html, true);
+            }
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
