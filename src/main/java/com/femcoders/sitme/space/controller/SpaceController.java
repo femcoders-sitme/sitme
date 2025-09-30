@@ -58,6 +58,21 @@ public class SpaceController {
     }
 
     @Operation(
+            summary = "Get a space by id",
+            description = "Returns details of a specific space."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Space retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = SpaceResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Space not found", content = @Content)
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<SpaceResponse> getSpaceById(@PathVariable Long id) {
+        SpaceResponse space = spaceService.getSpaceById(id);
+        return ResponseEntity.ok(space);
+    }
+
+    @Operation(
             summary = "Create a new space",
             description = "Adds a new space to the system. Only users with ADMIN role can perform this action."
     )
