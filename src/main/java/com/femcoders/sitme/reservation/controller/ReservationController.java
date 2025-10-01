@@ -7,7 +7,6 @@ import com.femcoders.sitme.security.userdetails.CustomUserDetails;
 import com.femcoders.sitme.shared.responses.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,12 +39,11 @@ public class ReservationController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Reservations retrieved successfully",
-                    content = @Content(
-                            array = @ArraySchema(schema = @Schema(implementation = ReservationResponse.class))
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class)
                     )
             ),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Access denied")
+            @ApiResponse(responseCode = "401", description = "Unauthenticated - missing or invalid JWT"),
+            @ApiResponse(responseCode = "403", description = "Access denied - insufficient permissions")
     })
     @GetMapping
     public ResponseEntity<SuccessResponse<List<ReservationResponse>>> getAllReservations() {
@@ -65,7 +63,7 @@ public class ReservationController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Reservation retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = ReservationResponse.class))
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
             ),
             @ApiResponse(responseCode = "404", description = "Reservation not found")
     })
@@ -88,12 +86,10 @@ public class ReservationController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Reservations retrieved successfully",
-                    content = @Content(
-                            array = @ArraySchema(schema = @Schema(implementation = ReservationResponse.class))
-                    )
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Access denied")
+            @ApiResponse(responseCode = "401", description = "Unauthenticated - missing or invalid JWT"),
+            @ApiResponse(responseCode = "403", description = "Access denied - insufficient permissions")
     })
     @GetMapping("/me")
     public ResponseEntity<SuccessResponse<List<ReservationResponse>>> getMyReservations(
@@ -106,57 +102,6 @@ public class ReservationController {
     }
 
     @Operation(
-            summary = "Cancel my reservation",
-            description = "Cancels a reservation belonging to the authenticated user. The reservation is not deleted but marked as cancelled for history tracking. Requires JWT token authentication",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Reservation cancelled successfully",
-                    content = @Content(schema = @Schema(implementation = ReservationResponse.class))
-            ),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated - invalid or missing token"),
-            @ApiResponse(responseCode = "403", description = "Access denied - reservation doesn't belong to you"),
-            @ApiResponse(responseCode = "404", description = "Reservation not found"),
-            @ApiResponse(responseCode = "409", description = "Reservation already cancelled")
-    })
-    @PatchMapping("/{id}/cancel")
-    public ResponseEntity<SuccessResponse<ReservationResponse>> cancelReservation(
-            @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-
-        ReservationResponse reservation = reservationService.cancelReservation(id, userDetails);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(SuccessResponse.of("Reservation cancelled successfully", reservation));
-    }
-
-    @Operation(
-            summary = "Delete reservation",
-            description = "Deletes a reservation by its ID. Only admins can perform this action.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Reservation deleted successfully",
-                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
-            ),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "404", description = "Reservation not found")
-    })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<SuccessResponse<String>> deleteReservation(
-            @Parameter(description = "Reservation ID to delete", required = true)
-            @PathVariable Long id) {
-
-        reservationService.deleteReservation(id); 
-        return ResponseEntity.ok(SuccessResponse.of("Reservation deleted successfully", null));
-     }
-
-    @Operation(
             summary = "Create a reservation",
             description = "Creates a new reservation associated with the authenticated user. " +
                     "The reservation will be stored with status ACTIVE by default and emailSent set to false.",
@@ -166,11 +111,11 @@ public class ReservationController {
             @ApiResponse(
                     responseCode = "201",
                     description = "Reservation created successfully",
-                    content = @Content(schema = @Schema(implementation = ReservationResponse.class))
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Validation error (e.g., past date or missing required fields)"
+                    description = "Validation error - past date or missing required fields"
             ),
             @ApiResponse(
                     responseCode = "401",
@@ -178,12 +123,15 @@ public class ReservationController {
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Access denied"
+                    description = "Access denied - insufficient permissions"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "User or Space not found"
-            )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Reservation conflict - time slot unavailable")
     })
     @PostMapping
     public ResponseEntity<SuccessResponse<ReservationResponse>> createReservation (
@@ -200,5 +148,125 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SuccessResponse.of("Reservation created successfully", reservationNew));
     }
+
+    @Operation(
+            summary = "Update my reservation",
+            description = "Updates a reservation belonging to the authenticated user. " +
+                    "Cannot update cancelled reservations. Validate availability of the new time slot.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservation updated successfully",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error - past date or missing required fields"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthenticated - missing or invalid JWT"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - insufficient permissions"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User or Space not found"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Reservation conflict - cannot update cancelled reservation or time slot not available"
+            )
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<SuccessResponse<ReservationResponse>> updateMyReservation(
+            @Parameter(description = "Reservation ID to delete", required = true)
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationRequest reservationRequest,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        ReservationResponse reservation = reservationService.updateMyReservation(id, reservationRequest, userDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(SuccessResponse.of("Reservation updated successfully", reservation));
+    }
+
+    @Operation(
+            summary = "Cancel my reservation",
+            description = "Cancel a reservation belonging to the authenticated user. The reservation is not deleted but marked as cancelled for history tracking",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservation cancelled successfully",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthenticated - invalid or missing token"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - reservation doesn't belong to you"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Reservation not found"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Reservation already cancelled"
+            )
+    })
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<SuccessResponse<ReservationResponse>> cancelMyReservation(
+            @Parameter(description = "Reservation ID to delete", required = true)
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        ReservationResponse reservation = reservationService.cancelMyReservation(id, userDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(SuccessResponse.of("Reservation cancelled successfully", reservation));
+    }
+
+    @Operation(
+            summary = "Delete reservation",
+            description = "Delete a reservation by its ID. Only admins can perform this action.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservation deleted successfully",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthenticated - invalid or missing token"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - reservation doesn't belong to you"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Reservation not found"
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SuccessResponse<String>> deleteReservation(
+            @Parameter(description = "Reservation ID to delete", required = true)
+            @PathVariable Long id) {
+
+        reservationService.deleteReservation(id);
+
+        return ResponseEntity.ok(SuccessResponse.of("Reservation deleted successfully", null));
+     }
 }
 

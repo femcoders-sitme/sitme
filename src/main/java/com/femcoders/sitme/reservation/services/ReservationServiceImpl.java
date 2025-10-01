@@ -88,7 +88,44 @@ public class ReservationServiceImpl implements ReservationService {
 
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Override
-    public ReservationResponse cancelReservation(Long id, CustomUserDetails userDetails) {
+    public ReservationResponse updateMyReservation(Long id, ReservationRequest reservationRequest, CustomUserDetails userDetails) {
+
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        if (!reservation.getUser().getId().equals(userDetails.getId())) {
+            throw new AccessDeniedException("You cannot update a reservation that doesn't belong to you");
+        }
+
+        if (reservation.getStatus() == Status.CANCELLED) {
+            throw new IllegalStateException("You cannot update a cancelled reservation");
+        }
+
+        Space space = spaceRepository.findById(reservationRequest.spaceId())
+                .orElseThrow(() -> new EntityNotFoundException(Space.class.getSimpleName(), reservationRequest.spaceId()));
+
+        boolean availabilityCheck = !reservation.getReservationDate().equals(reservationRequest.reservationDate())
+                || !reservation.getTimeSlot().equals(reservationRequest.timeSlot())
+                || !reservation.getSpace().getId().equals(reservationRequest.spaceId());
+
+        if (availabilityCheck && !isReservationAvailableForUpdate(reservationRequest, id)) {
+            throw new IllegalStateException("The selected time slot is not available");
+        }
+
+        reservation.setReservationDate(reservationRequest.reservationDate());
+
+        reservation.setTimeSlot(reservationRequest.timeSlot());
+
+        reservation.setSpace(space);
+
+        Reservation updatedReservation = reservationsRepository.save(reservation);
+
+        return ReservationMapper.entityToDto(updatedReservation);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Override
+    public ReservationResponse cancelMyReservation(Long id, CustomUserDetails userDetails) {
 
         Reservation reservation = reservationsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
@@ -140,6 +177,44 @@ public class ReservationServiceImpl implements ReservationService {
 
         for (Reservation existingReservation : existingReservations) {
 
+            if (reservationRequest.timeSlot() == TimeSlot.FULL_DAY &&
+                    (existingReservation.getTimeSlot() == TimeSlot.MORNING || existingReservation.getTimeSlot() == TimeSlot.AFTERNOON)) {
+                return false;
+            }
+
+            if ((reservationRequest.timeSlot() == TimeSlot.MORNING || reservationRequest.timeSlot() == TimeSlot.AFTERNOON)
+                    && existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (reservationRequest.timeSlot() == existingReservation.getTimeSlot()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isReservationAvailableForUpdate(ReservationRequest reservationRequest, Long currentReservationId) {
+        List<Reservation> existingReservations = reservationsRepository.findByReservationDateAndSpaceIdAndStatus(
+                reservationRequest.reservationDate(),
+                reservationRequest.spaceId(),
+                Status.ACTIVE
+        );
+
+        existingReservations = existingReservations.stream()
+                .filter(reservation -> !reservation.getId().equals(currentReservationId))
+                .toList();
+
+        if (existingReservations.isEmpty()) {
+            return true;
+        }
+
+        for (Reservation existingReservation : existingReservations) {
             if (reservationRequest.timeSlot() == TimeSlot.FULL_DAY &&
                     (existingReservation.getTimeSlot() == TimeSlot.MORNING || existingReservation.getTimeSlot() == TimeSlot.AFTERNOON)) {
                 return false;
