@@ -7,6 +7,7 @@ import com.femcoders.sitme.user.User;
 import com.femcoders.sitme.user.dtos.user.UserMapper;
 import com.femcoders.sitme.user.dtos.user.UserRequest;
 import com.femcoders.sitme.user.dtos.user.UserResponse;
+import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
 import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +49,19 @@ public class UserProfileServiceImpl implements UserProfileService {
             throw new AccessDeniedException("You are not allowed to update this profile");
         }
 
-        userProfile.setUsername(userRequest.username());
-        userProfile.setEmail(userRequest.email());
+        if (!userProfile.getUsername().equals(userRequest.username())) {
+            if (userRepository.existsByUsername(userRequest.username())) {
+                throw new IdentifierAlreadyExistsException("Username is already registered");
+            }
+            userProfile.setUsername(userRequest.username());
+        }
+
+        if (!userProfile.getEmail().equals(userRequest.email())) {
+            if (userRepository.existsByEmail(userRequest.email())) {
+                throw new IdentifierAlreadyExistsException("Email is already registered");
+            }
+            userProfile.setEmail(userRequest.email());
+        }
 
         if (userRequest.password() != null && !userRequest.password().isBlank()) {
             userProfile.setPassword(passwordEncoder.encode(userRequest.password()));
