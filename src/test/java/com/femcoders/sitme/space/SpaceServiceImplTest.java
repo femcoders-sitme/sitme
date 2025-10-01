@@ -40,6 +40,9 @@ public class SpaceServiceImplTest {
     @Mock
     private CloudinaryService cloudinaryService;
 
+    @Mock
+    private SpaceMapper spaceMapper;
+
     private Space space1;
     private Space space2;
     private SpaceResponse response1;
@@ -189,7 +192,6 @@ public class SpaceServiceImplTest {
 
             when(spaceRepository.findById(id)).thenReturn(Optional.of(space1));
             when(spaceRepository.save(any(Space.class))).thenReturn(updatedSpace);
-            when(SpaceMapper.entityToDto(updatedSpace)).thenReturn(updateResponse1);
 
             SpaceResponse response = spaceService.updateSpace(id, updateRequest1, mockFile);
 
@@ -209,10 +211,10 @@ public class SpaceServiceImplTest {
             updatedSpace.setName(updateRequest1.name());
             updatedSpace.setCapacity(updateRequest1.capacity());
             updatedSpace.setType(updateRequest1.type());
+            updatedSpace.setImageUrl(updateRequest1.imageUrl());
 
             when(spaceRepository.findById(id)).thenReturn(Optional.of(space1));
             when(spaceRepository.save(any(Space.class))).thenReturn(updatedSpace);
-            when(SpaceMapper.entityToDto(updatedSpace)).thenReturn(updateResponse1);
 
             SpaceResponse response = spaceService.updateSpace(id, updateRequest1, null);
 
