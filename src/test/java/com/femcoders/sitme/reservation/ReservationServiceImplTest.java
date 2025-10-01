@@ -1,8 +1,5 @@
-package com.femcoders.sitme.reservations;
+package com.femcoders.sitme.reservation;
 
-import com.femcoders.sitme.reservation.Reservation;
-import com.femcoders.sitme.reservation.Status;
-import com.femcoders.sitme.reservation.TimeSlot;
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.reservation.repository.ReservationRepository;
 import com.femcoders.sitme.reservation.services.ReservationServiceImpl;
