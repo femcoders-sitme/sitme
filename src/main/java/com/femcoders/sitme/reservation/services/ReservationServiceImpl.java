@@ -2,6 +2,7 @@ package com.femcoders.sitme.reservation.services;
 
 import com.femcoders.sitme.email.EmailService;
 import com.femcoders.sitme.reservation.Reservation;
+import com.femcoders.sitme.reservation.Status;
 import com.femcoders.sitme.reservation.TimeSlot;
 import com.femcoders.sitme.reservation.dtos.ReservationMapper;
 import com.femcoders.sitme.reservation.dtos.ReservationRequest;
@@ -15,11 +16,11 @@ import com.femcoders.sitme.user.User;
 import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -51,6 +52,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationMapper.entityToDto(reservation);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Override
     public List<ReservationResponse> getMyReservations(CustomUserDetails userDetails) {
 
@@ -60,8 +62,10 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Override
     public ReservationResponse createReservation(ReservationRequest reservationRequest, CustomUserDetails userDetails) {
+
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(()->new EntityNotFoundException(User.class.getSimpleName(), userDetails.getId()));
 
@@ -69,7 +73,9 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(()->new EntityNotFoundException(Space.class.getSimpleName(), reservationRequest.spaceId()));
 
         Reservation reservationNew = ReservationMapper.dtoToEntity(reservationRequest, user, space);
+
         Reservation reservationSaved = reservationsRepository.save(reservationNew);
+
         emailService.sendReservationConfirmationEmail(
                 reservationSaved.getUser().getEmail(),
                 reservationSaved.getUser().getUsername(),
@@ -80,9 +86,39 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationMapper.entityToDto(reservationSaved);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Override
+    public ReservationResponse cancelReservation(Long id, CustomUserDetails userDetails) {
+
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        if (!reservation.getUser().getId().equals(userDetails.getId())) {
+            throw new AccessDeniedException("You cannot cancel a reservation that doesn't belong to you");
+        }
+
+        if (reservation.getStatus() == Status.CANCELLED) {
+            throw new IllegalStateException("This reservation is already cancelled");
+        }
+
+        reservation.setStatus(Status.CANCELLED);
+
+        Reservation cancelledReservation = reservationsRepository.save(reservation);
+
+        // TODO: create sendCancellationEmail in email service
+        /*emailService.sendCancellationEmail(
+                cancelledReservation.getUser().getEmail(),
+                cancelledReservation.getUser().getUsername(),
+                cancelledReservation.getSpace().getName()
+        );*/
+
+        return ReservationMapper.entityToDto(cancelledReservation);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public void deleteReservation(Long id) {
+
         Reservation reservation = reservationsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
 
@@ -91,9 +127,12 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public boolean isReservationAvailable(ReservationRequest reservationRequest){
-        List<Reservation> existingReservations = reservationsRepository.findByReservationDateAndSpaceId(
+
+        List<Reservation> existingReservations = reservationsRepository.findByReservationDateAndSpaceIdAndStatus(
                 reservationRequest.reservationDate(),
-                reservationRequest.spaceId());
+                reservationRequest.spaceId(),
+                Status.ACTIVE
+        );
 
         if (existingReservations.isEmpty()) {
             return true;
