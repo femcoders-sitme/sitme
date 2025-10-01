@@ -5,6 +5,7 @@ import com.femcoders.sitme.user.User;
 import com.femcoders.sitme.user.dtos.user.UserMapper;
 import com.femcoders.sitme.user.dtos.user.UserResponse;
 import com.femcoders.sitme.user.dtos.user.UserRequest;
+import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
 import com.femcoders.sitme.user.repository.UserRepository;
 import com.femcoders.sitme.shared.exceptions.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -51,8 +52,19 @@ public class UserServiceImpl implements UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(User.class.getSimpleName(), id));
 
-        existingUser.setUsername(userRequest.username());
-        existingUser.setEmail(userRequest.email());
+        if (!existingUser.getUsername().equals(userRequest.username())) {
+            if (userRepository.existsByUsername(userRequest.username())) {
+                throw new IdentifierAlreadyExistsException("Username is already registered");
+            }
+            existingUser.setUsername(userRequest.username());
+        }
+
+        if (!existingUser.getEmail().equals(userRequest.email())) {
+            if (userRepository.existsByEmail(userRequest.email())) {
+                throw new IdentifierAlreadyExistsException("Email is already registered");
+            }
+            existingUser.setEmail(userRequest.email());
+        }
 
         if (userRequest.password() != null && !userRequest.password().isBlank()) {
             existingUser.setPassword(passwordEncoder.encode(userRequest.password()));
@@ -82,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-
+    @Override
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)

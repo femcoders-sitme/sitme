@@ -158,6 +158,11 @@ public class ReservationController {
             @Valid @RequestBody ReservationRequest reservationRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        if (!reservationService.isReservationAvailable(reservationRequest)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(SuccessResponse.of("This space is already booked for this date and time slot", null));
+        }
+
         ReservationResponse reservationNew = reservationService.createReservation(reservationRequest, userDetails);
 
         return ResponseEntity.status(HttpStatus.CREATED)
