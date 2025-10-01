@@ -1,8 +1,5 @@
-package com.femcoders.sitme.reservations;
+package com.femcoders.sitme.reservation;
 
-import com.femcoders.sitme.reservation.Reservation;
-import com.femcoders.sitme.reservation.Status;
-import com.femcoders.sitme.reservation.TimeSlot;
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.reservation.repository.ReservationRepository;
 import com.femcoders.sitme.reservation.services.ReservationServiceImpl;
@@ -258,5 +255,53 @@ public class ReservationServiceImplTest {
                 .user(secondTestUser)
                 .space(secondTestSpace)
                 .build();
+    }
+
+    @Nested
+    @DisplayName("DELETE /reservations/{id}")
+    class DeleteReservationTests {
+
+        @Test
+        @DisplayName("Should delete reservation when ID exists")
+        void shouldDeleteReservationWhenIdExists() {
+
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenReturn(Optional.of(testReservation));
+
+            reservationService.deleteReservation(TEST_RESERVATION_ID);
+
+            verify(reservationRepository, times(1)).findById(TEST_RESERVATION_ID);
+            verify(reservationRepository, times(1)).delete(testReservation);
+        }
+
+        @Test
+        @DisplayName("Should throw EntityNotFoundException when reservation does not exist")
+        void shouldThrowEntityNotFoundWhenReservationDoesNotExist() {
+
+            when(reservationRepository.findById(TEST_NON_EXISTENT_ID))
+                    .thenReturn(Optional.empty());
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                    () -> reservationService.deleteReservation(TEST_NON_EXISTENT_ID));
+
+            assertEquals("Reservation not found with id " + TEST_NON_EXISTENT_ID, exception.getMessage());
+            verify(reservationRepository, times(1)).findById(TEST_NON_EXISTENT_ID);
+            verify(reservationRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("Should propagate exception when repository fails")
+        void shouldPropagateExceptionWhenRepositoryFails() {
+
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenThrow(new RuntimeException("Database error"));
+
+            RuntimeException exception = assertThrows(RuntimeException.class,
+                    () -> reservationService.deleteReservation(TEST_RESERVATION_ID));
+
+            assertEquals("Database error", exception.getMessage());
+            verify(reservationRepository, times(1)).findById(TEST_RESERVATION_ID);
+            verify(reservationRepository, never()).delete(any());
+        }
     }
 }
