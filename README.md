@@ -313,8 +313,8 @@ curl -X GET http://localhost:8080/api/spaces
 
 <h2 id="team">👩‍💻 Team</h2>
 
-- **Débora Rubio** – Team Leader and Scrum Master
-- **Lara Pla** – Product Owner
+- **Débora Rubio** – Team Leader, Scrum Master and Developer
+- **Lara Pla** – Product Owner and Developer
 - **Mariia Sycheva** – Developer
 - **Mayleris Echezuria** – Developer
 - **Vita Poperechna** – Developer
