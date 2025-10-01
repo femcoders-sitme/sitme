@@ -4,6 +4,7 @@ import com.femcoders.sitme.cloudinary.service.CloudinaryService;
 import com.femcoders.sitme.user.User;
 import com.femcoders.sitme.user.dtos.user.UserResponse;
 import com.femcoders.sitme.user.dtos.user.UserRequest;
+import com.femcoders.sitme.user.exceptions.IdentifierAlreadyExistsException;
 import com.femcoders.sitme.user.repository.UserRepository;
 import com.femcoders.sitme.user.services.user.UserServiceImpl;
 import com.femcoders.sitme.shared.exceptions.EntityNotFoundException;
@@ -62,7 +63,6 @@ public class UserServiceImplTest {
         testUser.setEmail(TEST_EMAIL);
         testUser.setPassword(ENCODED_PASSWORD);
 
-        // CORREGIDO: Ahora usa UserRequest en lugar de UserUpdateRequest
         testUserRequest = new UserRequest(
                 UPDATED_USERNAME,
                 UPDATED_EMAIL,
@@ -73,14 +73,11 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("GET /users - should return all users")
     void getAllUsers_WhenUsersExist_ReturnsUserList() {
-        // Given
         List<User> users = List.of(testUser);
         when(userRepository.findAll()).thenReturn(users);
 
-        // When
         List<UserResponse> result = userService.getAllUsers();
 
-        // Then
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
@@ -91,13 +88,10 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("GET /users/{id} - should return user by id")
     void getUserById_WhenValidId_ReturnsUser() {
-        // Given
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
 
-        // When
         UserResponse result = userService.getUserById(TEST_USER_ID);
 
-        // Then
         assertNotNull(result);
         verify(userRepository).findById(TEST_USER_ID);
     }
@@ -105,10 +99,8 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("GET /users/{id} - should throw EntityNotFoundException when user not found")
     void getUserById_WhenUserNotFound_ThrowsException() {
-        // Given
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.empty());
 
-        // When & Then
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
                 () -> userService.getUserById(TEST_USER_ID)
@@ -119,62 +111,84 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("PUT /users/{id} - should update user successfully")
-    void updateUser_WhenValidData_ReturnsUpdatedUser() {
-        // Given
+    @DisplayName("PUT /users/{id} - should update user successfully when username and email don't change")
+    void updateUser_WhenSameUsernameAndEmail_ReturnsUpdatedUser() {
+        UserRequest sameDataRequest = new UserRequest(TEST_USERNAME, TEST_EMAIL, UPDATED_PASSWORD);
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
         when(passwordEncoder.encode(UPDATED_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // When
-        UserResponse result = userService.updateUser(TEST_USER_ID, testUserRequest, null);
+        UserResponse result = userService.updateUser(TEST_USER_ID, sameDataRequest, null);
 
-        // Then
         assertNotNull(result);
-        assertEquals(UPDATED_USERNAME, testUser.getUsername());
-        assertEquals(UPDATED_EMAIL, testUser.getEmail());
 
-        verify(userRepository).findById(TEST_USER_ID);
-        verify(passwordEncoder).encode(UPDATED_PASSWORD);
+        verify(userRepository, never()).existsByUsername(any());
+        verify(userRepository, never()).existsByEmail(any());
         verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("PUT /users/{id} - should throw exception when new username already exists")
+    void updateUser_WhenUsernameExists_ThrowsIdentifierAlreadyExistsException() {
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByUsername(UPDATED_USERNAME)).thenReturn(true);
+
+        IdentifierAlreadyExistsException exception = assertThrows(
+                IdentifierAlreadyExistsException.class,
+                () -> userService.updateUser(TEST_USER_ID, testUserRequest, null)
+        );
+
+        assertTrue(exception.getMessage().contains("Username is already registered"));
+        verify(userRepository).existsByUsername(UPDATED_USERNAME);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("PUT /users/{id} - should throw exception when new email already exists")
+    void updateUser_WhenEmailExists_ThrowsIdentifierAlreadyExistsException() {
+        UserRequest requestWithSameUsername = new UserRequest(TEST_USERNAME, UPDATED_EMAIL, UPDATED_PASSWORD);
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByEmail(UPDATED_EMAIL)).thenReturn(true);
+
+        IdentifierAlreadyExistsException exception = assertThrows(
+                IdentifierAlreadyExistsException.class,
+                () -> userService.updateUser(TEST_USER_ID, requestWithSameUsername, null)
+        );
+
+        assertTrue(exception.getMessage().contains("Email is already registered"));
+        verify(userRepository).existsByEmail(UPDATED_EMAIL);
+        verify(userRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("PUT /users/{id} - should update user without password when password is null")
     void updateUser_WhenPasswordIsNull_UpdatesUserWithoutPassword() {
-        // Given
         UserRequest requestWithoutPassword = new UserRequest(UPDATED_USERNAME, UPDATED_EMAIL, null);
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByUsername(UPDATED_USERNAME)).thenReturn(false);
+        when(userRepository.existsByEmail(UPDATED_EMAIL)).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // When
         UserResponse result = userService.updateUser(TEST_USER_ID, requestWithoutPassword, null);
 
-        // Then
         assertNotNull(result);
-        assertEquals(UPDATED_USERNAME, testUser.getUsername());
-        assertEquals(UPDATED_EMAIL, testUser.getEmail());
-
-        verify(userRepository).findById(TEST_USER_ID);
-        verify(passwordEncoder, never()).encode(any()); // No debe codificar password
+        verify(passwordEncoder, never()).encode(any());
         verify(userRepository).save(any(User.class));
     }
 
     @Test
     @DisplayName("PUT /users/{id} - should update user with image successfully")
     void updateUser_WhenWithImage_ReturnsUpdatedUserWithImage() {
-        // Given
         when(mockFile.isEmpty()).thenReturn(false);
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByUsername(UPDATED_USERNAME)).thenReturn(false);
+        when(userRepository.existsByEmail(UPDATED_EMAIL)).thenReturn(false);
         when(passwordEncoder.encode(UPDATED_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // When
         UserResponse result = userService.updateUser(TEST_USER_ID, testUserRequest, mockFile);
 
-        // Then
         assertNotNull(result);
-
         verify(cloudinaryService).uploadEntityImage(testUser, mockFile, "sitme/users");
         verify(cloudinaryService).deleteEntityImage(testUser);
         verify(userRepository).save(any(User.class));
@@ -183,10 +197,8 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("PUT /users/{id} - should throw EntityNotFoundException when user not found")
     void updateUser_WhenUserNotFound_ThrowsException() {
-        // Given
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.empty());
 
-        // When & Then
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
                 () -> userService.updateUser(TEST_USER_ID, testUserRequest, null)
@@ -200,16 +212,12 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("POST /users/{id}/image - should upload user image successfully")
     void uploadUserImage_WhenValidData_ReturnsUserWithImage() {
-        // Given
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // When
         UserResponse result = userService.uploadUserImage(TEST_USER_ID, mockFile);
 
-        // Then
         assertNotNull(result);
-
         verify(cloudinaryService).uploadEntityImage(testUser, mockFile, "sitme/users");
         verify(userRepository).save(testUser);
     }
@@ -217,11 +225,9 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("DELETE /users/{id}/image - should delete user image successfully")
     void deleteUserImage_WhenUserExists_DeletesImage() {
-        // Given
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // When & Then
         assertDoesNotThrow(() -> userService.deleteUserImage(TEST_USER_ID));
 
         verify(cloudinaryService).deleteEntityImage(testUser);
@@ -231,11 +237,9 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("DELETE /users/{id} - should delete user successfully")
     void deleteUser_WhenUserExists_DeletesUser() {
-        // Given
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
         doNothing().when(userRepository).deleteById(TEST_USER_ID);
 
-        // When & Then
         assertDoesNotThrow(() -> userService.deleteUser(TEST_USER_ID));
 
         verify(userRepository).findById(TEST_USER_ID);
@@ -245,10 +249,8 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("DELETE /users/{id} - should throw EntityNotFoundException when user not found")
     void deleteUser_WhenUserNotFound_ThrowsException() {
-        // Given
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.empty());
 
-        // When & Then
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
                 () -> userService.deleteUser(TEST_USER_ID)
@@ -256,7 +258,6 @@ public class UserServiceImplTest {
 
         assertTrue(exception.getMessage().contains(User.class.getSimpleName()));
         assertTrue(exception.getMessage().contains(TEST_USER_ID.toString()));
-
         verify(userRepository).findById(TEST_USER_ID);
         verify(userRepository, never()).deleteById(any());
     }
