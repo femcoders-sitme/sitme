@@ -12,10 +12,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,7 +33,8 @@ public class ReservationController {
 
     @Operation(
             summary = "Get all reservations",
-            description = "Returns a list of all registered reservations."
+            description = "Returns a list of all registered reservations.",
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
             @ApiResponse(
@@ -57,7 +58,8 @@ public class ReservationController {
 
     @Operation(
             summary = "Get reservation by ID",
-            description = "Retrieve a specific reservation by its identifier"
+            description = "Retrieve a specific reservation by its identifier",
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
             @ApiResponse(
@@ -79,7 +81,8 @@ public class ReservationController {
 
     @Operation(
             summary = "Get my reservations",
-            description = "Returns the list of reservations associated with the authenticated user"
+            description = "Returns the list of reservations associated with the authenticated user",
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
             @ApiResponse(
@@ -103,8 +106,36 @@ public class ReservationController {
     }
 
     @Operation(
+            summary = "Cancel my reservation",
+            description = "Cancels a reservation belonging to the authenticated user. The reservation is not deleted but marked as cancelled for history tracking. Requires JWT token authentication",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservation cancelled successfully",
+                    content = @Content(schema = @Schema(implementation = ReservationResponse.class))
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated - invalid or missing token"),
+            @ApiResponse(responseCode = "403", description = "Access denied - reservation doesn't belong to you"),
+            @ApiResponse(responseCode = "404", description = "Reservation not found"),
+            @ApiResponse(responseCode = "409", description = "Reservation already cancelled")
+    })
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<SuccessResponse<ReservationResponse>> cancelReservation(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        ReservationResponse reservation = reservationService.cancelReservation(id, userDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(SuccessResponse.of("Reservation cancelled successfully", reservation));
+    }
+
+    @Operation(
             summary = "Delete reservation",
-            description = "Deletes a reservation by its ID. Only admins can perform this action."
+            description = "Deletes a reservation by its ID. Only admins can perform this action.",
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
             @ApiResponse(
@@ -128,7 +159,8 @@ public class ReservationController {
     @Operation(
             summary = "Create a reservation",
             description = "Creates a new reservation associated with the authenticated user. " +
-                    "The reservation will be stored with status ACTIVE by default and emailSent set to false."
+                    "The reservation will be stored with status ACTIVE by default and emailSent set to false.",
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
             @ApiResponse(

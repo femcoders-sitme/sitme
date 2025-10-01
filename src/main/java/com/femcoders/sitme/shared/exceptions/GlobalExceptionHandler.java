@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException exception, HttpServletRequest request) {
         ErrorResponse errorResponse = buildErrorResponse(
                 ErrorCode.AUTH_05,
-                "Access denied: you do not have the required permissions",
+                exception.getMessage(),
                 HttpStatus.FORBIDDEN,
                 request.getRequestURI()
         );
@@ -80,6 +80,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIdentifierAlreadyExists(IdentifierAlreadyExistsException exception, HttpServletRequest request) {
         ErrorResponse error = buildErrorResponse(
                 exception.getErrorCode(),
+                exception.getMessage(),
+                HttpStatus.CONFLICT,
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException exception, HttpServletRequest request) {
+        ErrorResponse error = buildErrorResponse(
+                ErrorCode.RESERVATION_01,
                 exception.getMessage(),
                 HttpStatus.CONFLICT,
                 request.getRequestURI()
