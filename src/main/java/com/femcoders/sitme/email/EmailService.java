@@ -61,4 +61,28 @@ public class EmailService {
         }
     }
 
+    public void sendReservationCancellationEmail(String toEmail, String username, String spaceName, String date, String timeSlot) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("noreply@sitmeapp.com");
+            helper.setTo(toEmail);
+            helper.setSubject("Reservation cancelled | SitMe");
+
+            try (var inputStream = Objects.requireNonNull(
+                    EmailService.class.getResourceAsStream("/templates/reservation-cancellation.html"))) {
+                String html = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                html = html.replace("{{username}}", username)
+                        .replace("{{spaceName}}", spaceName)
+                        .replace("{{date}}", date)
+                        .replace("{{timeSlot}}", timeSlot)
+                        .replace("{{frontendUrl}}", frontendUrl);
+                helper.setText(html, true);
+            }
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
