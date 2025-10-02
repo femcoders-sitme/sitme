@@ -1,73 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Boot Tutorials Collection</title>
+    <title>Welcome to SitMe</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #F1E9C8;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #FFFFFF; /* fondo general blanco */
             margin: 0;
-            padding: 20px;
-        }
-        header {
-            text-align: left;
-        }
-        img {
-            width: 150px;
-        }
-        .content {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #FFFFFF;
-            padding: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-        }
-        .content-email {
-            background-color: #555555;
-            padding: 20px;
-        }
-        .content-email p {
-            font-size: 38px;
-            color: #FFFFFF;
-            padding: 20px;
-        }
-        footer {
-            padding: 20px;
+            padding: 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        footer p {
-            text-align: left;
-            color: #383838;
-            font-size: 24px;
+        .card {
+            background-color: #FFFFFF;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px;
+            border: 1px solid #EDEDED; /* borde fino */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* sombra sutil */
+            text-align: center;
+            overflow: hidden;
+            transition: transform 0.3s;
         }
-         button {
+        .card:hover {
+            transform: translateY(-2px); /* efecto ligero al pasar el cursor */
+        }
+        .card-header {
             background-color: #E20074;
-            width: 200px;
-            border-radius: 50px;
+            padding: 40px 20px;
         }
-        a {
-            color: #ffffff;
+        .card-header img {
+            width: 100px;
+        }
+        .card-body {
+            padding: 30px 20px;
+            color: #555555;
+        }
+        .card-body h1 {
+            font-size: 26px;
+            margin-bottom: 15px;
+            color: #383838;
+        }
+        .card-body p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #E20074;
+            color: #FFFFFF;
             text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 50px;
             font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .cta-button:hover {
+            background-color: #c40063;
+        }
+        .card-footer {
+            background-color: #F1E9C8; /* footer beige */
+            padding: 20px;
+            font-size: 14px;
+            color: #383838;
+        }
+        .card-footer a {
+            color: #E20074;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="content">
-        <header>
-            <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="Logo SitMe">
-        </header>
-        <div class="content-email">
-            <p>Hello, {{username}}, your registration was successful.</p>
-        </div>
-        <footer>
-            <p>Thank you for being with us.</p>
-            <button><a href="{{frontendUrl}}/spaces">RESERVE NOW</a></button>
-        </footer>
+<div class="card">
+    <div class="card-header">
+        <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="SitMe Logo">
     </div>
+    <div class="card-body">
+        <h1>Welcome, <span th:text="${username}">User</span>!</h1>
+        <p>Thank you for joining <strong>SitMe</strong>, the platform that makes reserving workspaces simple, safe, and efficient.</p>
+        <p>Browse available workstations and reserve your spot in just a few clicks.</p>
+        <a th:href="@{${frontendUrl}/spaces}" class="cta-button">Book Now</a>
+    </div>
+    <div class="card-footer">
+        We’re excited to have you on board! <br> If you need assistance, visit our <a th:href="@{${frontendUrl}/help}">Help Center</a>.
+    </div>
+</div>
 </body>
 </html>
