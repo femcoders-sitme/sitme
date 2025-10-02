@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to SitMe</title>
+    <title>Reservation Confirmed | SitMe</title>
     <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #FFFFFF; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background-color: #FFFFFF; width: 100%; max-width: 500px; border-radius: 16px; border: 1px solid #EDEDED; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; overflow: hidden; transition: transform 0.3s; }
-        .card:hover { transform: translateY(-2px); }
+        .card { background-color: #FFFFFF; max-width: 500px; border-radius: 16px; border: 1px solid #EDEDED; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; overflow: hidden; }
         .card-header { background-color: #E20074; padding: 40px 20px; }
         .card-header img { width: 100px; }
         .card-body { padding: 30px 20px; color: #555555; }
@@ -25,13 +24,13 @@
         <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="SitMe Logo">
     </div>
     <div class="card-body">
-        <h1>Welcome, <span th:text="${username}">User</span>!</h1>
-        <p>Thank you for joining <strong>SitMe</strong>, the platform that makes reserving workspaces simple, safe, and efficient.</p>
-        <p>Browse available workstations and reserve your spot in just a few clicks.</p>
-        <a th:href="@{${frontendUrl}/spaces}" class="cta-button">Book Now</a>
+        <h1>Reservation Confirmed, <span th:text="${username}">User</span>!</h1>
+        <p>Your workspace <strong th:text="${spaceName}">Space Name</strong> has been successfully reserved.</p>
+        <p>Date: <span th:text="${date}">DD/MM/YYYY</span> | Time: <span th:text="${timeSlot}">09:00 - 11:00</span></p>
+        <a th:href="@{${frontendUrl}/spaces}" class="cta-button">View Reservation</a>
     </div>
     <div class="card-footer">
-        We’re excited to have you on board! <br> If you need assistance, visit our <a th:href="@{${frontendUrl}/help}">Help Center</a>.
+        Thank you for using SitMe! If you need assistance, visit our <a th:href="@{${frontendUrl}/help}">Help Center</a>.
     </div>
 </div>
 </body>

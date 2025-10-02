@@ -1,13 +1,22 @@
 package com.femcoders.sitme.reservation.services;
 
+import com.femcoders.sitme.email.EmailService;
 import com.femcoders.sitme.reservation.Reservation;
+import com.femcoders.sitme.reservation.Status;
+import com.femcoders.sitme.reservation.TimeSlot;
 import com.femcoders.sitme.reservation.dtos.ReservationMapper;
+import com.femcoders.sitme.reservation.dtos.ReservationRequest;
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.reservation.repository.ReservationRepository;
 import com.femcoders.sitme.security.userdetails.CustomUserDetails;
 import com.femcoders.sitme.shared.exceptions.EntityNotFoundException;
+import com.femcoders.sitme.space.Space;
+import com.femcoders.sitme.space.repository.SpaceRepository;
+import com.femcoders.sitme.user.User;
+import com.femcoders.sitme.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +28,9 @@ import java.util.List;
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationsRepository;
+    private final UserRepository userRepository;
+    private final SpaceRepository spaceRepository;
+    private final EmailService emailService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @Override
@@ -40,6 +52,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationMapper.entityToDto(reservation);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Override
     public List<ReservationResponse> getMyReservations(CustomUserDetails userDetails) {
 
@@ -47,5 +60,189 @@ public class ReservationServiceImpl implements ReservationService {
                 .stream()
                 .map(ReservationMapper::entityToDto)
                 .toList();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Override
+    public ReservationResponse createReservation(ReservationRequest reservationRequest, CustomUserDetails userDetails) {
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(()->new EntityNotFoundException(User.class.getSimpleName(), userDetails.getId()));
+
+        Space space = spaceRepository.findById(reservationRequest.spaceId())
+                .orElseThrow(()->new EntityNotFoundException(Space.class.getSimpleName(), reservationRequest.spaceId()));
+
+        Reservation reservationNew = ReservationMapper.dtoToEntity(reservationRequest, user, space);
+
+        emailService.sendReservationConfirmationEmail(
+                reservationNew.getUser().getEmail(),
+                reservationNew.getUser().getUsername(),
+                reservationNew.getSpace().getName(),
+                reservationNew.getReservationDate(),
+                reservationNew.getTimeSlot().name());
+
+        reservationNew.setEmailSent(true);
+
+        Reservation reservationSaved = reservationsRepository.save(reservationNew);
+
+        return ReservationMapper.entityToDto(reservationSaved);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Override
+    public ReservationResponse updateMyReservation(Long id, ReservationRequest reservationRequest, CustomUserDetails userDetails) {
+
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        if (!reservation.getUser().getId().equals(userDetails.getId())) {
+            throw new AccessDeniedException("You cannot update a reservation that doesn't belong to you");
+        }
+
+        if (reservation.getStatus() == Status.CANCELLED) {
+            throw new IllegalStateException("You cannot update a cancelled reservation");
+        }
+
+        Space space = spaceRepository.findById(reservationRequest.spaceId())
+                .orElseThrow(() -> new EntityNotFoundException(Space.class.getSimpleName(), reservationRequest.spaceId()));
+
+        boolean availabilityCheck = !reservation.getReservationDate().equals(reservationRequest.reservationDate())
+                || !reservation.getTimeSlot().equals(reservationRequest.timeSlot())
+                || !reservation.getSpace().getId().equals(reservationRequest.spaceId());
+
+        if (availabilityCheck && !isReservationAvailableForUpdate(reservationRequest, id)) {
+            throw new IllegalStateException("The selected time slot is not available");
+        }
+
+        reservation.setReservationDate(reservationRequest.reservationDate());
+        reservation.setTimeSlot(reservationRequest.timeSlot());
+        reservation.setSpace(space);
+
+        Reservation updatedReservation = reservationsRepository.save(reservation);
+
+        emailService.sendReservationUpdateEmail(
+                updatedReservation.getUser().getEmail(),
+                updatedReservation.getUser().getUsername(),
+                updatedReservation.getSpace().getName(),
+                updatedReservation.getReservationDate(),
+                updatedReservation.getTimeSlot().toString()
+        );
+
+        return ReservationMapper.entityToDto(updatedReservation);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Override
+    public ReservationResponse cancelMyReservation(Long id, CustomUserDetails userDetails) {
+
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        if (!reservation.getUser().getId().equals(userDetails.getId())) {
+            throw new AccessDeniedException("You cannot cancel a reservation that doesn't belong to you");
+        }
+
+        if (reservation.getStatus() == Status.CANCELLED) {
+            throw new IllegalStateException("This reservation is already cancelled");
+        }
+
+        reservation.setStatus(Status.CANCELLED);
+
+        emailService.sendReservationCancellationEmail(
+                reservation.getUser().getEmail(),
+                reservation.getUser().getUsername(),
+                reservation.getSpace().getName(),
+                reservation.getReservationDate(),
+                reservation.getTimeSlot().toString()
+        );
+
+        Reservation cancelledReservation = reservationsRepository.save(reservation);
+
+        return ReservationMapper.entityToDto(cancelledReservation);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public void deleteReservation(Long id) {
+
+        Reservation reservation = reservationsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Reservation.class.getSimpleName(), id));
+
+        reservationsRepository.delete(reservation);
+    }
+
+    @Override
+    public boolean isReservationAvailable(ReservationRequest reservationRequest){
+
+        List<Reservation> existingReservations = reservationsRepository.findByReservationDateAndSpaceIdAndStatus(
+                reservationRequest.reservationDate(),
+                reservationRequest.spaceId(),
+                Status.ACTIVE
+        );
+
+        if (existingReservations.isEmpty()) {
+            return true;
+        }
+
+        for (Reservation existingReservation : existingReservations) {
+
+            if (reservationRequest.timeSlot() == TimeSlot.FULL_DAY &&
+                    (existingReservation.getTimeSlot() == TimeSlot.MORNING || existingReservation.getTimeSlot() == TimeSlot.AFTERNOON)) {
+                return false;
+            }
+
+            if ((reservationRequest.timeSlot() == TimeSlot.MORNING || reservationRequest.timeSlot() == TimeSlot.AFTERNOON)
+                    && existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (reservationRequest.timeSlot() == existingReservation.getTimeSlot()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isReservationAvailableForUpdate(ReservationRequest reservationRequest, Long currentReservationId) {
+        List<Reservation> existingReservations = reservationsRepository.findByReservationDateAndSpaceIdAndStatus(
+                reservationRequest.reservationDate(),
+                reservationRequest.spaceId(),
+                Status.ACTIVE
+        );
+
+        existingReservations = existingReservations.stream()
+                .filter(reservation -> !reservation.getId().equals(currentReservationId))
+                .toList();
+
+        if (existingReservations.isEmpty()) {
+            return true;
+        }
+
+        for (Reservation existingReservation : existingReservations) {
+            if (reservationRequest.timeSlot() == TimeSlot.FULL_DAY &&
+                    (existingReservation.getTimeSlot() == TimeSlot.MORNING || existingReservation.getTimeSlot() == TimeSlot.AFTERNOON)) {
+                return false;
+            }
+
+            if ((reservationRequest.timeSlot() == TimeSlot.MORNING || reservationRequest.timeSlot() == TimeSlot.AFTERNOON)
+                    && existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (existingReservation.getTimeSlot() == TimeSlot.FULL_DAY) {
+                return false;
+            }
+
+            if (reservationRequest.timeSlot() == existingReservation.getTimeSlot()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

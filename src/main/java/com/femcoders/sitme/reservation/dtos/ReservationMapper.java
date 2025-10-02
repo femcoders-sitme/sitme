@@ -21,6 +21,7 @@ public class ReservationMapper {
 
     public static ReservationResponse entityToDto(Reservation reservation) {
         return new ReservationResponse(
+                reservation.getId(),
                 reservation.getReservationDate(),
                 reservation.getTimeSlot(),
                 reservation.getStatus(),

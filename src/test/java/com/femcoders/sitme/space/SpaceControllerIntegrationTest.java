@@ -94,8 +94,8 @@ public class SpaceControllerIntegrationTest {
 
         @Test
         void shouldReturnListOfSpaces() throws Exception {
-            Space s1 = Space.builder().name("R-001").capacity(8).type(SpaceType.ROOM).isAvailable(true).imageUrl("https://picsum.photos/seed/roomA/600/400").build();
-            Space s2 = Space.builder().name("T-001").capacity(2).type(SpaceType.TABLE).isAvailable(true).imageUrl("https://picsum.photos/seed/table01/600/400").build();
+            Space s1 = Space.builder().name("R-001").capacity(8).type(SpaceType.ROOM).imageUrl("https://picsum.photos/seed/roomA/600/400").build();
+            Space s2 = Space.builder().name("T-001").capacity(2).type(SpaceType.TABLE).imageUrl("https://picsum.photos/seed/table01/600/400").build();
             spaceRepository.save(s1);
             spaceRepository.save(s2);
 
@@ -113,7 +113,7 @@ public class SpaceControllerIntegrationTest {
 
         @Test
         void shouldCreateNewSpace() throws Exception {
-            SpaceRequest request = new SpaceRequest("R-005", 4, SpaceType.ROOM, true, "https://picsum.photos/seed/roomE/600/400");
+            SpaceRequest request = new SpaceRequest("R-005", 4, SpaceType.ROOM, "https://picsum.photos/seed/roomE/600/400");
             String requestJson = objectMapper.writeValueAsString(request);
 
             MockMultipartFile spacePart =
@@ -138,7 +138,6 @@ public class SpaceControllerIntegrationTest {
                     .name("T-020")
                     .capacity(4)
                     .type(SpaceType.TABLE)
-                    .isAvailable(true)
                     .imageUrl("https://picsum.photos/seed/table20/600/400")
                     .build();
 

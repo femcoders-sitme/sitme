@@ -8,6 +8,6 @@ public class InvalidCredentialsException extends RuntimeException {
     }
 
     public ErrorCode getErrorCode() {
-        return ErrorCode.AUTH_02;
+        return ErrorCode.AUTH_01;
     }
 }

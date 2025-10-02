@@ -5,11 +5,11 @@ import com.femcoders.sitme.user.User;
 
 public class UserMapper {
 
-    public static User dtoToEntity(UserRequest userRequestDTO, Role role) {
+    public static User dtoToEntity(UserRequest request, Role role) {
         return User.builder()
-                .username(userRequestDTO.username())
-                .email(userRequestDTO.email())
-                .password(userRequestDTO.password())
+                .username(request.username())
+                .email(request.email())
+                .password(request.password())
                 .role(role)
                 .build();
     }

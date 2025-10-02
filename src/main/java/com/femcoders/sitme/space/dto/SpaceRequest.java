@@ -20,9 +20,6 @@ public record SpaceRequest(
         @NotNull(message = "Type is required")
         SpaceType type,
 
-        @NotNull(message = "Availability must be specified")
-        Boolean isAvailable,
-
         @Size(max = 500, message = "Image URL must be less than 500 characters")
         @URL(message = "Image URL must be a valid URL")
         String imageUrl

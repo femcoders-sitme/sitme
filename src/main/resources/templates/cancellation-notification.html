@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Cancelled | SitMe</title>
+    <style>
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #FFFFFF; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .card { background-color: #FFFFFF; max-width: 500px; border-radius: 16px; border: 1px solid #EDEDED; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; overflow: hidden; }
+    .card-header { background-color: #E20074; padding: 40px 20px; }
+    .card-header img { width: 100px; }
+    .card-body { padding: 30px 20px; color: #555555; }
+    .card-body h1 { font-size: 26px; margin-bottom: 15px; color: #383838; }
+    .card-body p { font-size: 16px; line-height: 1.6; margin-bottom: 30px; }
+    .cta-button { display: inline-block; background-color: #E20074; color: #FFFFFF; text-decoration: none; padding: 15px 40px; border-radius: 50px; font-weight: bold; transition: background-color 0.3s; }
+    .cta-button:hover { background-color: #c40063; }
+    .card-footer { background-color: #F1E9C8; padding: 20px; font-size: 14px; color: #383838; }
+    .card-footer a { color: #E20074; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="SitMe Logo">
+    </div>
+    <div class="card-body">
+        <h1>Reservation Cancelled, <span th:text="${username}">User</span>!</h1>
+        <p>Your workspace <strong th:text="${spaceName}">Space Name</strong> reservation scheduled for <span th:text="${date}">DD/MM/YYYY</span> at <span th:text="${timeSlot}">09:00 - 11:00</span> has been cancelled.</p>
+        <a th:href="@{${frontendUrl}/spaces}" class="cta-button">Book a New Spot</a>
+    </div>
+    <div class="card-footer">
+        If you need assistance or want to book another workspace, visit our <a th:href="@{${frontendUrl}/help}">Help Center</a>.
+    </div>
+</div>
+</body>
+</html>

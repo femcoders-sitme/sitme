@@ -58,16 +58,18 @@ public class SpaceController {
     }
 
     @Operation(
-            summary = "Filter available spaces",
-            description = "Returns only spaces that are currently available."
+            summary = "Get a space by id",
+            description = "Returns details of a specific space."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Available spaces retrieved successfully",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SpaceResponse.class))))
+            @ApiResponse(responseCode = "200", description = "Space retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = SpaceResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Space not found", content = @Content)
     })
-    @GetMapping("/filter/available")
-    public ResponseEntity<List<SpaceResponse>> getAvailableSpaces() {
-        return ResponseEntity.ok(spaceService.getAvailableSpaces());
+    @GetMapping("/{id}")
+    public ResponseEntity<SpaceResponse> getSpaceById(@PathVariable Long id) {
+        SpaceResponse space = spaceService.getSpaceById(id);
+        return ResponseEntity.ok(space);
     }
 
     @Operation(
@@ -125,6 +127,15 @@ public class SpaceController {
                 .body(SuccessResponse.of("Space updated successfully", updateSpace));
     }
 
+    @Operation(
+            summary = "Delete a space",
+            description = "Deletes a space by id. Only users with the ADMIN role can perform this action."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Space deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "403", description = "User does not have ADMIN role", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Space not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSpace(@PathVariable Long id) {
