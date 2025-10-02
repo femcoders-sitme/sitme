@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservation Cancelled | SitMe</title>
+    <title>Reservation Updated | SitMe</title>
     <style>
     body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #FFFFFF; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
     .card { background-color: #FFFFFF; max-width: 500px; border-radius: 16px; border: 1px solid #EDEDED; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; overflow: hidden; }
@@ -24,12 +24,13 @@
         <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="SitMe Logo">
     </div>
     <div class="card-body">
-        <h1>Reservation Cancelled, <span th:text="${username}">User</span>!</h1>
-        <p>Your workspace <strong th:text="${spaceName}">Space Name</strong> reservation scheduled for <span th:text="${date}">DD/MM/YYYY</span> at <span th:text="${timeSlot}">09:00 - 11:00</span> has been cancelled.</p>
-        <a th:href="@{${frontendUrl}/spaces}" class="cta-button">Book a New Spot</a>
+        <h1>Reservation Updated, <span th:text="${username}">User</span>!</h1>
+        <p>Your workspace <strong th:text="${spaceName}">Space Name</strong> reservation has been updated successfully.</p>
+        <p>New Date: <span th:text="${date}">DD/MM/YYYY</span> | New Time: <span th:text="${timeSlot}">09:00 - 11:00</span></p>
+        <a th:href="@{${frontendUrl}/spaces}" class="cta-button">View Reservation</a>
     </div>
     <div class="card-footer">
-        If you need assistance or want to book another workspace, visit our <a th:href="@{${frontendUrl}/help}">Help Center</a>.
+        We’re excited to have you on board! If you need assistance, visit our <a th:href="@{${frontendUrl}/help}">Help Center</a>.
     </div>
 </div>
 </body>
