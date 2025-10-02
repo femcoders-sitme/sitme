@@ -11,7 +11,8 @@ public interface ReservationService {
     ReservationResponse getReservationById(Long id);
     List<ReservationResponse> getMyReservations(CustomUserDetails userDetails);
     ReservationResponse createReservation(ReservationRequest reservationRequest, CustomUserDetails userDetails);
-    ReservationResponse cancelReservation(Long id, CustomUserDetails userDetails);
+    ReservationResponse updateMyReservation(Long id, ReservationRequest reservationRequest, CustomUserDetails userDetails);
+    ReservationResponse cancelMyReservation(Long id, CustomUserDetails userDetails);
     void deleteReservation(Long id);
     boolean isReservationAvailable(ReservationRequest reservationRequest);
 }

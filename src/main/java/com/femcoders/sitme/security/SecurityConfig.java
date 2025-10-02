@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/spaces").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/spaces/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reservations/me").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/reservations/{id}").hasAnyRole("USER","ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/reservations/{id}/cancel").hasAnyRole("USER","ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/reservations").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/reservations/{id}").hasRole("ADMIN")
