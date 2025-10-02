@@ -131,6 +131,117 @@ class ReservationControllerIntegrationTest {
     }
 
     @Nested
+    @DisplayName("GET /api/reservations/me")
+    class GetMyReservations {
+
+        @Test
+        void shouldReturnMyReservations() throws Exception {
+            reservationRepository.save(
+                    Reservation.builder()
+                            .reservationDate(LocalDate.now().plusDays(3))
+                            .timeSlot(TimeSlot.MORNING)
+                            .status(Status.ACTIVE)
+                            .emailSent(false)
+                            .createdAt(LocalDateTime.now())
+                            .user(testUser)
+                            .space(testSpace)
+                            .build()
+            );
+
+            mockMvc.perform(get("/api/reservations/me")
+                            .header("Authorization", "Bearer " + userToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data", hasSize(1)))
+                    .andExpect(jsonPath("$.data[0].spaceId").value(testSpace.getId()))
+                    .andExpect(jsonPath("$.data[0].userId").value(testUser.getId()));
+        }
+
+        @Test
+        void shouldReturnEmptyListIfUserHasNoReservations() throws Exception {
+            mockMvc.perform(get("/api/reservations/me")
+                            .header("Authorization", "Bearer " + userToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data", hasSize(0)));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/reservations")
+    class AddReservation {
+
+        @Test
+        void shouldCreateReservation() throws Exception {
+            ReservationRequest request = new ReservationRequest(
+                    LocalDate.now().plusDays(1),
+                    TimeSlot.MORNING,
+                    testSpace.getId()
+            );
+
+            mockMvc.perform(post("/api/reservations")
+                            .header("Authorization", "Bearer " + userToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated());
+        }
+    }
+
+    @Nested
+    @DisplayName("PUT /api/reservations/{id}")
+    class UpdateReservation {
+        @Test
+        void shouldUpdateReservation() throws Exception {
+            Reservation reservation = reservationRepository.save(
+                    Reservation.builder()
+                            .reservationDate(LocalDate.now().plusDays(2))
+                            .timeSlot(TimeSlot.MORNING)
+                            .status(Status.ACTIVE)
+                            .emailSent(false)
+                            .createdAt(LocalDateTime.now())
+                            .user(testUser)
+                            .space(testSpace)
+                            .build()
+            );
+
+            ReservationRequest updateRequest = new ReservationRequest(
+                    LocalDate.now().plusDays(3),
+                    TimeSlot.AFTERNOON,
+                    testSpace.getId()
+            );
+
+            mockMvc.perform(put("/api/reservations/{id}", reservation.getId())
+                            .header("Authorization", "Bearer " + userToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("Reservation updated successfully"));
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH /api/reservations/{id}/cancel")
+    class CancelReservation {
+        @Test
+        void shouldCancelReservation() throws Exception {
+            Reservation reservation = reservationRepository.save(
+                    Reservation.builder()
+                            .reservationDate(LocalDate.now().plusDays(4))
+                            .timeSlot(TimeSlot.AFTERNOON)
+                            .status(Status.ACTIVE)
+                            .emailSent(false)
+                            .createdAt(LocalDateTime.now())
+                            .user(testUser)
+                            .space(testSpace)
+                            .build()
+            );
+
+            mockMvc.perform(patch("/api/reservations/{id}/cancel", reservation.getId())
+                            .header("Authorization", "Bearer " + userToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("Reservation cancelled successfully"));
+        }
+    }
+
+    @Nested
     @DisplayName("DELETE /api/reservations/{id}")
     class DeleteReservation {
 
@@ -162,23 +273,4 @@ class ReservationControllerIntegrationTest {
         }
     }
 
-    @Nested
-    @DisplayName("POST /api/reservations")
-    class AddReservation {
-
-        @Test
-        void shouldCreateReservation() throws Exception {
-            ReservationRequest request = new ReservationRequest(
-                    LocalDate.now().plusDays(1),
-                    TimeSlot.MORNING,
-                    testSpace.getId()
-            );
-
-            mockMvc.perform(post("/api/reservations")
-                            .header("Authorization", "Bearer " + userToken)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated());
-        }
-    }
 }
