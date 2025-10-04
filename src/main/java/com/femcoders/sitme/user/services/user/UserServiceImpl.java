@@ -71,8 +71,8 @@ public class UserServiceImpl implements UserService {
         }
 
         if (file != null && !file.isEmpty()) {
-            cloudinaryService.uploadEntityImage(existingUser, file, "sitme/users");
             cloudinaryService.deleteEntityImage(existingUser);
+            cloudinaryService.uploadEntityImage(existingUser, file, "sitme/users");
         }
 
         User updatedUser = userRepository.save(existingUser);
