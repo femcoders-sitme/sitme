@@ -16,8 +16,6 @@ public enum ErrorCode {
     SPACE_01, // Space already exists
 
     RESERVATION_01, // Invalid reservation request
-    RESERVATION_02, // Reservation request not found
-    RESERVATION_03, // Unauthorized reservation request access
 
     SERVER_01 // Internal server error
 }

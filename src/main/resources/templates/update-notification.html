@@ -24,7 +24,7 @@
         <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="SitMe Logo">
     </div>
     <div class="card-body">
-        <h1>Reservation Updated, <span th:text="${username}">User</span>!</h1>
+        <h1>Reservation updated, <span th:text="${username}">User</span>!</h1>
         <p>Your workspace <strong th:text="${spaceName}">Space Name</strong> reservation has been updated successfully.</p>
         <p>New Date: <span th:text="${date}">DD/MM/YYYY</span> | New Time: <span th:text="${timeSlot}">09:00 - 11:00</span></p>
         <a th:href="@{${frontendUrl}/spaces}" class="cta-button">View Reservation</a>
