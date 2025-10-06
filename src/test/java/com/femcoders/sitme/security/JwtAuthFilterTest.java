@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -149,6 +150,22 @@ class JwtAuthFilterTest {
         jwtAuthFilter.invokeDoFilterInternal(request, response, filterChain);
 
         verify(customUserDetailsService, never()).loadUserById(anyLong());
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void doFilterInternal_UserAlreadyAuthenticated_DoesNotReauthenticate() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn("Bearer sometoken");
+        when(jwtService.extractUserId("sometoken")).thenReturn("1");
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("existingUser", null)
+        );
+
+        jwtAuthFilter.invokeDoFilterInternal(request, response, filterChain);
+
+        verify(customUserDetailsService, never()).loadUserById(anyLong());
+        verify(jwtService, never()).isValidToken(anyString(), any());
         verify(filterChain).doFilter(request, response);
     }
 }
