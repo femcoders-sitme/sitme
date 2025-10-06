@@ -127,6 +127,15 @@ public class SpaceController {
                 .body(SuccessResponse.of("Space updated successfully", updateSpace));
     }
 
+    @Operation(
+            summary = "Delete a space",
+            description = "Deletes a space by id. Only users with the ADMIN role can perform this action."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Space deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "403", description = "User does not have ADMIN role", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Space not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSpace(@PathVariable Long id) {

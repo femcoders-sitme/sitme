@@ -74,14 +74,16 @@ public class ReservationServiceImpl implements ReservationService {
 
         Reservation reservationNew = ReservationMapper.dtoToEntity(reservationRequest, user, space);
 
-        Reservation reservationSaved = reservationsRepository.save(reservationNew);
-
         emailService.sendReservationConfirmationEmail(
-                reservationSaved.getUser().getEmail(),
-                reservationSaved.getUser().getUsername(),
-                reservationSaved.getSpace().getName(),
-                reservationSaved.getReservationDate().toString(),
-                reservationSaved.getTimeSlot().name());
+                reservationNew.getUser().getEmail(),
+                reservationNew.getUser().getUsername(),
+                reservationNew.getSpace().getName(),
+                reservationNew.getReservationDate(),
+                reservationNew.getTimeSlot().name());
+
+        reservationNew.setEmailSent(true);
+
+        Reservation reservationSaved = reservationsRepository.save(reservationNew);
 
         return ReservationMapper.entityToDto(reservationSaved);
     }
@@ -113,12 +115,18 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         reservation.setReservationDate(reservationRequest.reservationDate());
-
         reservation.setTimeSlot(reservationRequest.timeSlot());
-
         reservation.setSpace(space);
 
         Reservation updatedReservation = reservationsRepository.save(reservation);
+
+        emailService.sendReservationUpdateEmail(
+                updatedReservation.getUser().getEmail(),
+                updatedReservation.getUser().getUsername(),
+                updatedReservation.getSpace().getName(),
+                updatedReservation.getReservationDate(),
+                updatedReservation.getTimeSlot().toString()
+        );
 
         return ReservationMapper.entityToDto(updatedReservation);
     }
@@ -140,14 +148,15 @@ public class ReservationServiceImpl implements ReservationService {
 
         reservation.setStatus(Status.CANCELLED);
 
-        Reservation cancelledReservation = reservationsRepository.save(reservation);
+        emailService.sendReservationCancellationEmail(
+                reservation.getUser().getEmail(),
+                reservation.getUser().getUsername(),
+                reservation.getSpace().getName(),
+                reservation.getReservationDate(),
+                reservation.getTimeSlot().toString()
+        );
 
-        // TODO: create sendCancellationEmail in email service
-        /*emailService.sendCancellationEmail(
-                cancelledReservation.getUser().getEmail(),
-                cancelledReservation.getUser().getUsername(),
-                cancelledReservation.getSpace().getName()
-        );*/
+        Reservation cancelledReservation = reservationsRepository.save(reservation);
 
         return ReservationMapper.entityToDto(cancelledReservation);
     }

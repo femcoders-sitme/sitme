@@ -68,8 +68,8 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
 
         if (file != null && !file.isEmpty()) {
-            cloudinaryService.uploadEntityImage(userProfile, file, "sitme/users");
             cloudinaryService.deleteEntityImage(userProfile);
+            cloudinaryService.uploadEntityImage(userProfile, file, "sitme/users");
         }
 
         User updatedProfile = userRepository.save(userProfile);
