@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile # Use Dockerfile in current directory
 
     # Custom container name for easier identification
-    container_name: sitme-springboot
+    container_name: sitme-app
 
     # Port mapping: host:container
     # Maps host port 8080 to container port 8080
@@ -23,6 +23,9 @@ services:
       - DB_URL=jdbc:mysql://sitme-db:3306/sitme # Database connection URL using service name
       - DB_USERNAME=sitme # Database username
       - DB_PASSWORD=sitme123 # Database password
+      - JWT_SECRET_KEY=my-super-secter-key-123456789123456789123456789 #JWT secret key
+      - SPRING_MAIL_HOST=mailhog
+      - SPRING_MAIL_PORT=1025
 
     # Restart policy - restarts container unless explicitly stopped
     restart: unless-stopped
@@ -31,6 +34,8 @@ services:
     depends_on:
       sitme-db:
         condition: service_healthy # Wait for DB health check to pass
+      mailhog:
+        condition: service_started #Wait for Mailhog service started to pass
 
     # Health check configuration for the SpringBoot application
     healthcheck:
@@ -88,6 +93,26 @@ services:
       timeout: 5s # Timeout after 5 seconds
       retries: 5 # Retry 5 times before marking as unhealthy
       start_period: 30s # Wait 30 seconds before starting health checks
+
+    # Connect to custom network
+    networks:
+      - sitme-network
+
+  #Mailhog Configuration
+  mailhog:
+    # Use official Mailghog image from Docker Hub
+    image: mailhog/mailhog:latest
+
+    # Custom container name for easier identification
+    container_name: mailhog
+
+    # Port mapping: host:container
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # UI web
+
+    # Restart policy - restarts container unless explicitly stopped
+    restart: unless-stopped
 
     # Connect to custom network
     networks:
