@@ -1,5 +1,6 @@
 package com.femcoders.sitme.reservation;
 
+import com.femcoders.sitme.email.EmailService;
 import com.femcoders.sitme.reservation.dtos.ReservationRequest;
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.reservation.dtos.ReservationRequest;
@@ -75,6 +76,9 @@ public class ReservationServiceImplTest {
 
     @Mock
     private SpaceRepository spaceRepository;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private ReservationServiceImpl reservationService;
