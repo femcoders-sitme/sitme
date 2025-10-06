@@ -1,10 +1,13 @@
 package com.femcoders.sitme.reservation;
 
+import com.femcoders.sitme.reservation.dtos.ReservationRequest;
 import com.femcoders.sitme.reservation.dtos.ReservationResponse;
 import com.femcoders.sitme.reservation.repository.ReservationRepository;
 import com.femcoders.sitme.reservation.services.ReservationServiceImpl;
+import com.femcoders.sitme.security.userdetails.CustomUserDetails;
 import com.femcoders.sitme.shared.exceptions.EntityNotFoundException;
 import com.femcoders.sitme.space.Space;
+import com.femcoders.sitme.space.repository.SpaceRepository;
 import com.femcoders.sitme.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,9 +63,17 @@ public class ReservationServiceImplTest {
     private static final String ERROR_DATABASE = "Database error";
     private static final String ERROR_DATABASE_CONNECTION = "Database connection failed";
     private static final String ERROR_RESERVATION_NOT_FOUND = "Reservation not found with id ";
+    private static final LocalDate TEST_DATE = LocalDate.of(2024, 12, 25);
+    private static final LocalDate TEST_NEW_DATE = LocalDate.of(2024, 12, 26);
+    private static final TimeSlot TEST_SLOT = TimeSlot.MORNING;
+    private static final TimeSlot TEST_NEW_SLOT = TimeSlot.AFTERNOON;
+
 
     @Mock
     private ReservationRepository reservationRepository;
+
+    @Mock
+    private SpaceRepository spaceRepository;
 
     @InjectMocks
     private ReservationServiceImpl reservationService;
@@ -258,6 +270,33 @@ public class ReservationServiceImplTest {
     }
 
     @Nested
+    @DisplayName("GET /reservations/my")
+    class GetMyReservationsTests {
+
+        @Mock
+        private CustomUserDetails mockUserDetails;
+
+        @BeforeEach
+        void initUser() {
+            when(mockUserDetails.getId()).thenReturn(TEST_USER_ID);
+        }
+
+        @Test
+        @DisplayName("Should return only reservations of current user")
+        void shouldReturnOnlyReservationsOfCurrentUser() {
+            when(reservationRepository.findByUserId(TEST_USER_ID))
+                    .thenReturn(List.of(testReservation));
+
+            List<ReservationResponse> result = reservationService.getMyReservations(mockUserDetails);
+
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            assertEquals(TEST_USER_ID, result.get(0).userId());
+            verify(reservationRepository).findByUserId(TEST_USER_ID);
+        }
+    }
+
+    @Nested
     @DisplayName("DELETE /reservations/{id}")
     class DeleteReservationTests {
 
@@ -304,4 +343,162 @@ public class ReservationServiceImplTest {
             verify(reservationRepository, never()).delete(any());
         }
     }
+
+    @Nested
+    @DisplayName("PUT /reservations/{id}")
+    class UpdateMyReservationTests {
+
+        @Mock
+        private CustomUserDetails mockUserDetails;
+
+        @BeforeEach
+        void initUser() {
+            when(mockUserDetails.getId()).thenReturn(TEST_USER_ID);
+        }
+
+        @Test
+        @DisplayName("Should update reservation successfully when owned by user")
+        void shouldUpdateReservationSuccessfullyWhenOwnedByUser() {
+            ReservationRequest request = new ReservationRequest(
+                    TEST_NEW_DATE,
+                    TEST_NEW_SLOT,
+                    TEST_ANOTHER_SPACE_ID);
+
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenReturn(Optional.of(testReservation));
+            when(spaceRepository.findById(TEST_ANOTHER_SPACE_ID))
+                    .thenReturn(Optional.of(secondTestSpace));
+            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(
+                    request.reservationDate(), request.spaceId(), Status.ACTIVE))
+                    .thenReturn(Collections.emptyList());
+            when(reservationRepository.save(any(Reservation.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            ReservationResponse result =
+                    reservationService.updateMyReservation(TEST_RESERVATION_ID, request, mockUserDetails);
+
+            assertNotNull(result);
+            assertEquals(TEST_NEW_DATE, result.reservationDate());
+            assertEquals(TEST_NEW_SLOT, result.timeSlot());
+            assertEquals(TEST_ANOTHER_SPACE_ID, result.spaceId());
+            verify(reservationRepository).save(any(Reservation.class));
+        }
+
+        @Test
+        @DisplayName("Should throw AccessDeniedException when user does not own the reservation")
+        void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnReservation() {
+            when(mockUserDetails.getId()).thenReturn(TEST_ANOTHER_USER_ID);
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenReturn(Optional.of(testReservation));
+
+            ReservationRequest request = new ReservationRequest(
+                    TEST_DATE, TEST_SLOT, TEST_SPACE_ID
+                        );
+
+            assertThrows(AccessDeniedException.class, () ->
+                    reservationService.updateMyReservation(TEST_RESERVATION_ID, request, mockUserDetails));
+            verify(reservationRepository, times(1)).findById(TEST_RESERVATION_ID);
+            verify(reservationRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalStateException when reservation already cancelled")
+        void shouldThrowIllegalStateExceptionWhenReservationIsCancelled() {
+            Reservation cancelled = Reservation.builder()
+                    .id(TEST_RESERVATION_ID)
+                    .status(Status.CANCELLED)
+                    .user(testUser)
+                    .space(testSpace)
+                    .reservationDate(TEST_DATE)
+                    .timeSlot(TEST_SLOT)
+                    .build();
+
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenReturn(Optional.of(cancelled));
+
+            ReservationRequest request = new ReservationRequest(
+                    TEST_DATE, TEST_SLOT, TEST_SPACE_ID
+                        );
+
+            assertThrows(IllegalStateException.class, () ->
+                    reservationService.updateMyReservation(TEST_RESERVATION_ID, request, mockUserDetails));
+            verify(reservationRepository, never()).save(any());
+        }
+    }
+
+    // ------------------ CANCEL TESTS ------------------
+    @Nested
+    @DisplayName("PATCH /reservations/{id}/cancel")
+    class CancelMyReservationTests {
+
+        @Mock
+        private CustomUserDetails mockUserDetails;
+
+        @BeforeEach
+        void initUser() {
+            lenient().when(mockUserDetails.getId()).thenReturn(TEST_USER_ID);
+        }
+
+        @Test
+        @DisplayName("Should cancel reservation successfully when owned by user")
+        void shouldCancelReservationSuccessfullyWhenOwnedByUser() {
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenReturn(Optional.of(testReservation));
+            when(reservationRepository.save(any(Reservation.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            ReservationResponse result =
+                    reservationService.cancelMyReservation(TEST_RESERVATION_ID, mockUserDetails);
+
+            assertNotNull(result);
+            assertEquals(Status.CANCELLED, result.status());
+            verify(reservationRepository).save(any(Reservation.class));
+        }
+
+        @Test
+        @DisplayName("Should throw AccessDeniedException when user tries to cancel another user's reservation")
+        void shouldThrowAccessDeniedExceptionWhenCancellingOtherUserReservation() {
+            when(mockUserDetails.getId()).thenReturn(TEST_ANOTHER_USER_ID);
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenReturn(Optional.of(testReservation));
+
+            assertThrows(AccessDeniedException.class, () ->
+                    reservationService.cancelMyReservation(TEST_RESERVATION_ID, mockUserDetails));
+            verify(reservationRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalStateException when reservation already cancelled")
+        void shouldThrowIllegalStateExceptionWhenReservationAlreadyCancelled() {
+            Reservation cancelled = Reservation.builder()
+                    .id(TEST_RESERVATION_ID)
+                    .status(Status.CANCELLED)
+                    .user(testUser)
+                    .space(testSpace)
+                    .reservationDate(TEST_DATE)
+                    .timeSlot(TEST_SLOT)
+                    .build();
+
+            when(reservationRepository.findById(TEST_RESERVATION_ID))
+                    .thenReturn(Optional.of(cancelled));
+
+            assertThrows(IllegalStateException.class, () ->
+                    reservationService.cancelMyReservation(TEST_RESERVATION_ID, mockUserDetails));
+            verify(reservationRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw EntityNotFoundException when reservation does not exist")
+        void shouldThrowEntityNotFoundExceptionWhenReservationDoesNotExist() {
+            when(reservationRepository.findById(TEST_NON_EXISTENT_ID))
+                    .thenReturn(Optional.empty());
+
+            EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () ->
+                    reservationService.cancelMyReservation(TEST_NON_EXISTENT_ID, mockUserDetails));
+
+            assertEquals(ERROR_RESERVATION_NOT_FOUND + TEST_NON_EXISTENT_ID, ex.getMessage());
+            verify(reservationRepository, never()).save(any());
+        }
+    }
+
 }
