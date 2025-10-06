@@ -34,7 +34,9 @@ public class UserAuthController {
             @ApiResponse(responseCode = "409", description = "Conflict (username or email already exists)")
     })
     public ResponseEntity<SuccessResponse<RegisterResponse>> register(@RequestBody @Valid RegisterRequest registerRequest) {
+
         RegisterResponse registerResponse = userService.addUser(registerRequest);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SuccessResponse.of("User registered successfully", registerResponse)
                 );

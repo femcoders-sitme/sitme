@@ -62,6 +62,7 @@ public class UserProfileController {
             @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
+
         UserRequest request = mapper.readValue(userJson, UserRequest.class);
 
         UserResponse updatedProfile = userProfileService.updateMyProfile(userDetails, request, file);

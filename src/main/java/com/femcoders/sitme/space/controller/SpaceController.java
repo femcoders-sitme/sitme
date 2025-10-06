@@ -54,6 +54,7 @@ public class SpaceController {
     })
     @GetMapping("/filter/type")
     public ResponseEntity<List<SpaceResponse>> getSpacesByType(@RequestParam SpaceType type) {
+
         return ResponseEntity.ok(spaceService.getSpacesByType(type));
     }
 
@@ -68,7 +69,9 @@ public class SpaceController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<SpaceResponse> getSpaceById(@PathVariable Long id) {
+
         SpaceResponse space = spaceService.getSpaceById(id);
+
         return ResponseEntity.ok(space);
     }
 
@@ -91,6 +94,7 @@ public class SpaceController {
             @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
+
         SpaceRequest request = mapper.readValue(spaceJson, SpaceRequest.class);
 
         SpaceResponse newSpace = spaceService.addSpace(request, file);
@@ -119,6 +123,7 @@ public class SpaceController {
             @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
+
         SpaceRequest request = mapper.readValue(spaceJson, SpaceRequest.class);
 
         SpaceResponse updateSpace = spaceService.updateSpace(id, request, file);
@@ -139,7 +144,9 @@ public class SpaceController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSpace(@PathVariable Long id) {
+
         spaceService.deleteSpace(id);
+
         return ResponseEntity.noContent().build();
     }
 }

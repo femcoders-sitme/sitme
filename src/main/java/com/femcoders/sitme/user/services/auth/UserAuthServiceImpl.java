@@ -47,6 +47,7 @@ public class UserAuthServiceImpl implements UserAuthService {
 
         User newUser = registerMapper.dtoToEntity(registerRequest);
         newUser.setPassword(passwordEncoder.encode(registerRequest.password()));
+
         User savedUser = userRepository.save(newUser);
         emailService.sendRegistrationEmail(savedUser.getEmail(), savedUser.getUsername());
 
@@ -72,6 +73,7 @@ public class UserAuthServiceImpl implements UserAuthService {
             );
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
             String token = jwtService.generateToken(userDetails);
 
             return new LoginResponse(token);

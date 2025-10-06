@@ -15,6 +15,7 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI sitmeOpenApi() {
+
         return new OpenAPI()
                 .info(new Info()
                         .title("SitMe API")
