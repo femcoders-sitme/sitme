@@ -173,7 +173,7 @@ public class ReservationServiceImplTest {
         @Test
         @DisplayName("Should return reservation when ID exists")
         void shouldReturnReservationWhenIdExists() {
-            
+
             when(reservationRepository.findById(TEST_RESERVATION_ID)).thenReturn(Optional.of(testReservation));
 
             ReservationResponse result = reservationService.getReservationById(TEST_RESERVATION_ID);
@@ -226,7 +226,7 @@ public class ReservationServiceImplTest {
         return user;
     }
 
-    private User createSecondTestUser(){
+    private User createSecondTestUser() {
         User user = new User();
         user.setId(TEST_ANOTHER_USER_ID);
         user.setUsername(TEST_ANOTHER_USER_NAME);
@@ -398,7 +398,7 @@ public class ReservationServiceImplTest {
 
             ReservationRequest request = new ReservationRequest(
                     TEST_DATE, TEST_SLOT, TEST_SPACE_ID
-                        );
+            );
 
             assertThrows(AccessDeniedException.class, () ->
                     reservationService.updateMyReservation(TEST_RESERVATION_ID, request, mockUserDetails));
@@ -423,7 +423,7 @@ public class ReservationServiceImplTest {
 
             ReservationRequest request = new ReservationRequest(
                     TEST_DATE, TEST_SLOT, TEST_SPACE_ID
-                        );
+            );
 
             assertThrows(IllegalStateException.class, () ->
                     reservationService.updateMyReservation(TEST_RESERVATION_ID, request, mockUserDetails));
@@ -502,189 +502,269 @@ public class ReservationServiceImplTest {
 
             assertEquals(ERROR_RESERVATION_NOT_FOUND + TEST_NON_EXISTENT_ID, ex.getMessage());
             verify(reservationRepository, never()).save(any());
-          
-    @DisplayName("Availabiliy for POST /reservations")
-    class ReservationAvailabilityTests {
-        @Test
-        @DisplayName("Should return true when no existing reservations (isReservationAvailable)")
-        void shouldReturnTrueWhenNoExistingReservations() {
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(Collections.emptyList());
 
-            boolean result = reservationService.isReservationAvailable(request);
-
-            assertTrue(result);
-            verify(reservationRepository).findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE);
         }
 
-        @Test
-        @DisplayName("Should return false when FULL_DAY conflicts with MORNING reservation")
-        void shouldReturnFalseWhenFullDayConflictsWithMorning() {
-            Reservation existing = Reservation.builder()
-                    .id(1L)
-                    .reservationDate(TEST_RESERVATION_DATE)
-                    .timeSlot(TimeSlot.MORNING)
-                    .status(Status.ACTIVE)
-                    .space(testSpace)
-                    .build();
+        @Nested
+        @DisplayName("Availabiliy for POST /reservations")
+        class ReservationAvailabilityTests {
+            @Test
+            @DisplayName("Should return true when no existing reservations (isReservationAvailable)")
+            void shouldReturnTrueWhenNoExistingReservations() {
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(Collections.emptyList());
 
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.FULL_DAY, TEST_SPACE_ID);
+                boolean result = reservationService.isReservationAvailable(request);
 
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(List.of(existing));
+                assertTrue(result);
+                verify(reservationRepository).findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE);
+            }
 
-            boolean result = reservationService.isReservationAvailable(request);
+            @Test
+            @DisplayName("Should return false when FULL_DAY conflicts with MORNING reservation")
+            void shouldReturnFalseWhenFullDayConflictsWithMorning() {
+                Reservation existing = Reservation.builder()
+                        .id(1L)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.MORNING)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
 
-            assertFalse(result);
-        }
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.FULL_DAY, TEST_SPACE_ID);
 
-        @Test
-        @DisplayName("Should return false when MORNING conflicts with FULL_DAY reservation")
-        void shouldReturnFalseWhenMorningConflictsWithFullDay() {
-            Reservation existing = Reservation.builder()
-                    .id(2L)
-                    .reservationDate(TEST_RESERVATION_DATE)
-                    .timeSlot(TimeSlot.FULL_DAY)
-                    .status(Status.ACTIVE)
-                    .space(testSpace)
-                    .build();
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
 
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+                boolean result = reservationService.isReservationAvailable(request);
 
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(List.of(existing));
+                assertFalse(result);
+            }
 
-            boolean result = reservationService.isReservationAvailable(request);
+            @Test
+            @DisplayName("Should return false when MORNING conflicts with FULL_DAY reservation")
+            void shouldReturnFalseWhenMorningConflictsWithFullDay() {
+                Reservation existing = Reservation.builder()
+                        .id(2L)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.FULL_DAY)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
 
-            assertFalse(result);
-        }
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
 
-        @Test
-        @DisplayName("Should return false when existing reservation has FULL_DAY")
-        void shouldReturnFalseWhenExistingReservationHasFullDay() {
-            Reservation existing = Reservation.builder()
-                    .id(3L)
-                    .reservationDate(TEST_RESERVATION_DATE)
-                    .timeSlot(TimeSlot.FULL_DAY)
-                    .status(Status.ACTIVE)
-                    .space(testSpace)
-                    .build();
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
 
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.AFTERNOON, TEST_SPACE_ID);
+                boolean result = reservationService.isReservationAvailable(request);
 
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(List.of(existing));
+                assertFalse(result);
+            }
 
-            boolean result = reservationService.isReservationAvailable(request);
+            @Test
+            @DisplayName("Should return false when existing reservation has FULL_DAY")
+            void shouldReturnFalseWhenExistingReservationHasFullDay() {
+                Reservation existing = Reservation.builder()
+                        .id(3L)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.FULL_DAY)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
 
-            assertFalse(result);
-        }
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.AFTERNOON, TEST_SPACE_ID);
 
-        @Test
-        @DisplayName("Should return false when same timeSlot already reserved")
-        void shouldReturnFalseWhenSameTimeSlotAlreadyReserved() {
-            Reservation existing = Reservation.builder()
-                    .id(4L)
-                    .reservationDate(TEST_RESERVATION_DATE)
-                    .timeSlot(TimeSlot.MORNING)
-                    .status(Status.ACTIVE)
-                    .space(testSpace)
-                    .build();
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
 
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+                boolean result = reservationService.isReservationAvailable(request);
 
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(List.of(existing));
+                assertFalse(result);
+            }
 
-            boolean result = reservationService.isReservationAvailable(request);
+            @Test
+            @DisplayName("Should return false when same timeSlot already reserved")
+            void shouldReturnFalseWhenSameTimeSlotAlreadyReserved() {
+                Reservation existing = Reservation.builder()
+                        .id(4L)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.MORNING)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
 
-            assertFalse(result);
-        }
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
 
-        @Test
-        @DisplayName("Should return true when no conflicts found (isReservationAvailableForUpdate)")
-        void shouldReturnTrueWhenNoConflictsForUpdate() {
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(Collections.emptyList());
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
 
-            boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
+                boolean result = reservationService.isReservationAvailable(request);
 
-            assertTrue(result);
-        }
+                assertFalse(result);
+            }
 
-        @Test
-        @DisplayName("Should return true when only current reservation exists (isReservationAvailableForUpdate)")
-        void shouldReturnTrueWhenOnlyCurrentReservationExists() {
-            Reservation existing = Reservation.builder()
-                    .id(TEST_RESERVATION_ID)
-                    .reservationDate(TEST_RESERVATION_DATE)
-                    .timeSlot(TimeSlot.MORNING)
-                    .status(Status.ACTIVE)
-                    .space(testSpace)
-                    .build();
+            @Test
+            @DisplayName("Should return true when no conflicts found (isReservationAvailableForUpdate)")
+            void shouldReturnTrueWhenNoConflictsForUpdate() {
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(Collections.emptyList());
 
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+                boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
 
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(List.of(existing));
+                assertTrue(result);
+            }
 
-            boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
+            @Test
+            @DisplayName("Should return true when only current reservation exists (isReservationAvailableForUpdate)")
+            void shouldReturnTrueWhenOnlyCurrentReservationExists() {
+                Reservation existing = Reservation.builder()
+                        .id(TEST_RESERVATION_ID)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.MORNING)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
 
-            assertTrue(result);
-        }
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
 
-        @Test
-        @DisplayName("Should return false when another reservation conflicts (FULL_DAY, MORNING, AFTERNOON)")
-        void shouldReturnFalseWhenAnotherReservationConflicts() {
-            Reservation existing = Reservation.builder()
-                    .id(TEST_ANOTHER_RESERVATION_ID)
-                    .reservationDate(TEST_RESERVATION_DATE)
-                    .timeSlot(TimeSlot.MORNING)
-                    .status(Status.ACTIVE)
-                    .space(testSpace)
-                    .build();
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
 
-            ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.FULL_DAY, TEST_SPACE_ID);
+                boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
 
-            when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                    .thenReturn(List.of(existing));
+                assertTrue(result);
+            }
 
-            boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
+            @Test
+            @DisplayName("Should return false when another reservation conflicts (FULL_DAY, MORNING, AFTERNOON)")
+            void shouldReturnFalseWhenAnotherReservationConflicts() {
+                Reservation existing = Reservation.builder()
+                        .id(TEST_ANOTHER_RESERVATION_ID)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.MORNING)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
 
-            assertFalse(result);
-        }
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.FULL_DAY, TEST_SPACE_ID);
 
-        @Test
-        @DisplayName("Should return false when another reservation has FULL_DAY")
-                void shouldReturnFalseWhenAnotherReservationHasFullDay() {
-                    Reservation existing = Reservation.builder()
-                            .id(TEST_ANOTHER_RESERVATION_ID)
-                            .reservationDate(TEST_RESERVATION_DATE)
-                            .timeSlot(TimeSlot.FULL_DAY)
-                            .status(Status.ACTIVE)
-                            .space(testSpace)
-                            .build();
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
 
-                    ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+                boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
 
-                    when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
-                            .thenReturn(List.of(existing));
+                assertFalse(result);
+            }
 
-                    boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
+            @Test
+            @DisplayName("Should return false when another reservation has FULL_DAY")
+            void shouldReturnFalseWhenAnotherReservationHasFullDay() {
+                Reservation existing = Reservation.builder()
+                        .id(TEST_ANOTHER_RESERVATION_ID)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.FULL_DAY)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
 
-                    assertFalse(result);
-                }
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
 
-                private boolean invokeIsReservationAvailableForUpdate(ReservationRequest request, Long id) {
-                    try {
-                        var method = ReservationServiceImpl.class.getDeclaredMethod("isReservationAvailableForUpdate", ReservationRequest.class, Long.class);
-                        method.setAccessible(true);
-                        return (boolean) method.invoke(reservationService, request, id);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
+
+                boolean result = invokeIsReservationAvailableForUpdate(request, TEST_RESERVATION_ID);
+
+                assertFalse(result);
+            }
+
+            @Test
+            @DisplayName("Should return true when all conditions are false (no conflicts)")
+            void shouldReturnTrueWhenAllConditionsAreFalse() {
+                Reservation existing = Reservation.builder()
+                        .id(5L)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.AFTERNOON)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
+
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
+
+                boolean result = reservationService.isReservationAvailable(request);
+
+                assertTrue(result);
+            }
+
+            @Test
+            @DisplayName("Should return true when no conflicts and different reservation id (for update)")
+            void shouldReturnTrueWhenNoConflictsDifferentId() throws Exception {
+                Reservation existing = Reservation.builder()
+                        .id(TEST_ANOTHER_RESERVATION_ID)
+                        .reservationDate(TEST_RESERVATION_DATE)
+                        .timeSlot(TimeSlot.AFTERNOON)
+                        .status(Status.ACTIVE)
+                        .space(testSpace)
+                        .build();
+
+                ReservationRequest request = new ReservationRequest(TEST_RESERVATION_DATE, TimeSlot.MORNING, TEST_SPACE_ID);
+
+                when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(TEST_RESERVATION_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
+
+                var method = ReservationServiceImpl.class.getDeclaredMethod(
+                        "isReservationAvailableForUpdate", ReservationRequest.class, Long.class);
+                method.setAccessible(true);
+                boolean result = (boolean) method.invoke(reservationService, request, TEST_RESERVATION_ID);
+
+                assertTrue(result);
+            }
+
+            @Test
+            @DisplayName("Should not throw exception when availabilityCheck runs without conflict")
+            void shouldNotThrowExceptionWhenAvailabilityCheckRuns() {
+                Reservation existing = Reservation.builder()
+                        .id(TEST_RESERVATION_ID)
+                        .reservationDate(TEST_DATE)
+                        .timeSlot(TEST_SLOT)
+                        .status(Status.ACTIVE)
+                        .user(testUser)
+                        .space(testSpace)
+                        .build();
+
+                ReservationRequest request = new ReservationRequest(TEST_DATE, TEST_SLOT, TEST_SPACE_ID);
+
+                lenient().when(reservationRepository.findById(TEST_RESERVATION_ID))
+                        .thenReturn(Optional.of(existing));
+                lenient().when(spaceRepository.findById(TEST_SPACE_ID))
+                        .thenReturn(Optional.of(testSpace));
+                lenient().when(reservationRepository.findByReservationDateAndSpaceIdAndStatus(
+                                TEST_DATE, TEST_SPACE_ID, Status.ACTIVE))
+                        .thenReturn(List.of(existing));
+                lenient().when(reservationRepository.save(any(Reservation.class)))
+                        .thenAnswer(invocation -> invocation.getArgument(0));
+
+                CustomUserDetails mockUserDetails = mock(CustomUserDetails.class);
+                when(mockUserDetails.getId()).thenReturn(TEST_USER_ID);
+
+                assertDoesNotThrow(() ->
+                        reservationService.updateMyReservation(TEST_RESERVATION_ID, request, mockUserDetails));
+
+                verify(reservationRepository, atLeastOnce()).findById(TEST_RESERVATION_ID);
+            }
+
+            private boolean invokeIsReservationAvailableForUpdate(ReservationRequest request, Long id) {
+                try {
+                    var method = ReservationServiceImpl.class.getDeclaredMethod("isReservationAvailableForUpdate", ReservationRequest.class, Long.class);
+                    method.setAccessible(true);
+                    return (boolean) method.invoke(reservationService, request, id);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
