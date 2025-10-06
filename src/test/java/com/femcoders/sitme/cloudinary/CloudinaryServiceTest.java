@@ -189,6 +189,20 @@ class CloudinaryServiceTest {
         assertEquals("Failed to delete image from Cloudinary", exception.getMessage());
     }
 
+    @Test
+    void deleteEntityImage_PublicIdBlank_DoesNotCallCloudinary() throws Exception {
+        TestImageEntity entity = new TestImageEntity();
+        entity.setImageUrl(URL);
+        entity.setCloudinaryImageId("   ");
+
+        TestImageEntity result = cloudinaryService.deleteEntityImage(entity);
+
+        assertEquals("https://res.cloudinary.com/test/image/upload/test/test-image.jpg", result.getImageUrl());
+        assertEquals("   ", result.getCloudinaryImageId());
+        verify(uploader, never()).destroy(anyString(), anyMap());
+    }
+
+
     private static class TestImageEntity implements ImageUpdatable {
         private String imageUrl;
         private String cloudinaryImageId;
