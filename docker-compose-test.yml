@@ -17,7 +17,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=test
       - SERVER_PORT=8080
-      - JWT_SECRET_KEY=my-super-secter-key-123456789123456789123456789
 
     restart: no
 
