@@ -4,7 +4,8 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen?logo=springboot&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?logo=docker&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-purple?logo=githubactions&logoColor=white)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-6e40c9?logo=github&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Deploy-Kubernetes-326ce5?logo=kubernetes&logoColor=white)
 ![License](https://img.shields.io/badge/License-Educational-yellow)
 
 **SitMe** is a Spring Boot application for managing workspace reservations, built with modern Java technologies and containerized with Docker.
@@ -45,6 +46,8 @@
 - **Database Integration**: MySQL with JPA/Hibernate
 - **Health Checks**: Actuator endpoints to monitor application status
 - **Containerization**: Full Docker support with multi-stage builds
+- **Container Orchestration**: Kubernetes for deploying and managing the application in a scalable way.
+- **Deployment Manifests**: YAML files for Deployments, Services, ConfigMaps, and Kustomizations.
 
 <br>
 
@@ -57,9 +60,10 @@
 - **Email**: Spring Mail (configured for MailHog in development)
 - **Testing**: JUnit, Mockito
 - **API Documentation**: Swagger/OpenAPI 3
-- **Containerization**: Docker, Docker Compose
+- **Containerization**: Docker
 - **Build Tool**: Maven
-- **CI/CD**: GitHub Actions
+- **CI**: GitHub Actions
+- **CD**: Kubernetes
 
 <br>
 
@@ -67,7 +71,7 @@
 
 - Java 21
 - Maven 3.9+
-- Docker and Docker Compose
+- Docker
 - MySQL 8.0 (if running locally without Docker)
 
 <br>
@@ -78,6 +82,7 @@
 src/
 ├── main/java/com/femcoders/sitme/
 │   ├── cloudinary/          # Image upload service
+│   ├── config/              # CORS and Swagger configurations
 │   ├── email/               # Email notifications
 │   ├── reservation/         # Reservation management
 │   ├── security/            # JWT security configuration
@@ -85,8 +90,10 @@ src/
 │   ├── space/               # Workspace management
 │   └── user/                # User management and authentication
 └── main/resources/
+    ├── templates/           # Thymeleaf templates
     ├── application.properties
     └── data.sql             # Initial data setup
+
 ```
 
 <br>
@@ -110,14 +117,19 @@ JWT_EXPIRATION=1800000
 # Server Configuration
 SERVER_PORT=8080
 
+# MailHog Configuration
+spring.mail.host=localhost
+spring.mail.port=1025
+spring.mail.username=
+spring.mail.password=
+spring.mail.properties.mail.smtp.auth=false
+spring.mail.properties.mail.smtp.starttls.enable=false
+
 # Cloudinary Configuration (for image uploads)
 CLOUDINARY_NAME=your_cloudinary_name
 CLOUDINARY_KEY=your_cloudinary_api_key
 CLOUDINARY_SECRET=your_cloudinary_secret
 
-# Docker Hub (for CI/CD)
-DOCKER_USERNAME=your_docker_username
-DOCKER_PASSWORD=your_docker_password
 ```
 
 <br>
@@ -128,7 +140,7 @@ DOCKER_PASSWORD=your_docker_password
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/femcoders-sitme/sitme.git
    cd sitme
    ```
 
@@ -139,7 +151,7 @@ DOCKER_PASSWORD=your_docker_password
 
 3. **Access the application**:
     - API: http://localhost:8081
-    - Database: localhost:3306
+    - Database: localhost:3307
     - Swagger Documentation: http://localhost:8081/swagger-ui.html
 
 ### Option 2: Local Development
@@ -162,12 +174,12 @@ DOCKER_PASSWORD=your_docker_password
 
 ## 🧪 Testing
 
-### Run Unit Tests
+### Run Test Suite
 ```bash
 mvn test
 ```
 
-### Run Integration Tests with Docker
+### Run Test Suite with Docker
 ```bash
 docker-compose -f docker-compose-test.yml up --abort-on-container-exit
 ```
@@ -187,14 +199,19 @@ The test suite includes:
 
 ### User Management
 
+- `GET /api/users/me` - Get own user profile (USER/ADMIN)
+- `PUT /api/users/me` - Update own user profile (USER/ADMIN)
+- `GET /api/users` - Get all users (Admin only)
 - `GET /api/users/{id}` - Get user by ID (Admin only)
 - `PUT /api/users/{id}` - Update user profile (Admin only)
+- `DELETE /api/users/{id}` - Delete user (Admin only)
 - `POST /api/users/{id}/image` - Upload user profile image
 - `DELETE /api/users/{id}/image` - Delete user profile image
 
 ### Space Management
 
 - `GET /api/spaces` - Get all spaces
+- `GET /api/spaces/{id}` - Get space by ID
 - `GET /api/spaces/filter/type?type={TYPE}` - Filter spaces by type (ROOM/TABLE)
 - `GET /api/spaces/filter/available` - Get available spaces only
 - `POST /api/spaces` - Create new space (Admin only)
@@ -203,8 +220,19 @@ The test suite includes:
 
 ### Reservation Management
 
+- `GET /api/reservations/me` - Get own reservations (USER/ADMIN)
+- `POST /api/reservations` - Create new reservation (USER only)
+- `PUT /api/reservations/{id}` - Update reservation (USER/ADMIN)
+- `PATCH /api/reservations/{id}/cancel` - Cancel reservation (USER/ADMIN)
 - `GET /api/reservations` - Get all reservations (Admin only)
 - `GET /api/reservations/{id}` - Get reservation by ID (Admin only)
+- `DELETE /api/reservations/{id}` - Delete reservation (Admin only)
+
+### Swagger & Actuator
+
+- `/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**` - API documentation
+- `/actuator/**` - Application health and metrics
+
 
 ### Default Users
 
@@ -232,7 +260,8 @@ The application comes with preloaded test data:
 - Automatic cleanup when images are deleted
 
 ### Email System
-- Registration confirmation emails
+- Registration confirmation email
+- Reservation notifications: email sent when a reservation is created, updated, or cancelled
 - Configurable SMTP settings
 - MailHog integration for development
 
@@ -268,6 +297,43 @@ GitHub Actions workflows included:
 - **Test**: Runs on pull requests
 - **Build**: Builds and pushes Docker images on main branch pushes
 - **Release**: Creates releases and pushes tagged images
+- **Deploy**: Triggers Kubernetes deployment workflows
+
+<br>
+
+## ☸️ Kubernetes Deployment
+
+- **Container Orchestration**: Deploy the application using Kubernetes
+- **Manifests**: Includes YAML files for Deployment, Service, and ConfigMap
+- **Kustomization**: Manage overlays and environment-specific configurations
+- **Scalability**: Horizontal Pod Autoscaler for dynamic scaling
+- **Persistent Storage**: PersistentVolumeClaims for database and file storage
+- **Monitoring & Logging**: Optional integration with Prometheus/Grafana
+
+<br>
+
+## 🏗️ CI/CD & Kubernetes Workflow
+
+```
+[Developer]
+└─ pushes code
+▼
+[GitHub Repository]
+└─ triggers workflow
+▼
+[GitHub Actions CI/CD]
+├─ Run tests
+├─ Build Docker image
+├─ Push image to registry
+└─ Deploy to Kubernetes
+▼
+[Kubernetes Cluster]
+├─ Deployment: runs pods with your app
+├─ Service: exposes app internally/externally
+├─ ConfigMap & Secrets: app configuration
+├─ HPA: auto-scaling pods
+└─ PersistentVolumeClaims: database & file storage
+```
 
 <br>
 
@@ -313,7 +379,7 @@ curl -X GET http://localhost:8080/api/spaces
 
 <h2 id="team">👩‍💻 Team</h2>
 
-- **Débora Rubio** – Team Leader, Scrum Master and Developer
+- **Débora Rubio** – Scrum Master and Developer
 - **Lara Pla** – Product Owner and Developer
 - **Mariia Sycheva** – Developer
 - **Mayleris Echezuria** – Developer

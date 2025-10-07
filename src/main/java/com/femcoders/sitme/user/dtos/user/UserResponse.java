@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record UserResponse(
+        Long id,
         String username,
         String email,
         Role role,

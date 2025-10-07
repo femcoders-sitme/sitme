@@ -107,8 +107,7 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SuccessResponse<UserResponse>> uploadUserImage(
             @PathVariable Long id,
-            @RequestParam("file") MultipartFile file
-    ) {
+            @RequestParam("file") MultipartFile file) {
 
         UserResponse userResponse = userService.uploadUserImage(id, file);
 

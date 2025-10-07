@@ -271,5 +271,21 @@ public class SpaceServiceImplTest {
 
             verify(spaceRepository).findById(id);
         }
+
+        @Test
+        @DisplayName("Should delete space and cloudinary image when image ID is present")
+        void shouldDeleteCloudinaryImageIfPresent() {
+            Long id = 2L;
+            Space space = new Space();
+            space.setId(id);
+            space.setCloudinaryImageId("cloudinary-image-id");
+
+            given(spaceRepository.findById(id)).willReturn(Optional.of(space));
+
+            spaceService.deleteSpace(id);
+
+            verify(cloudinaryService).deleteEntityImage(space);
+            verify(spaceRepository).deleteById(id);
+        }
     }
 }

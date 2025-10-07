@@ -24,7 +24,7 @@
         <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="SitMe Logo">
     </div>
     <div class="card-body">
-        <h1>Reservation Confirmed, <span th:text="${username}">User</span>!</h1>
+        <h1>Reservation confirmed, <span th:text="${username}">User</span>!</h1>
         <p>Your workspace <strong th:text="${spaceName}">Space Name</strong> has been successfully reserved.</p>
         <p>Date: <span th:text="${date}">DD/MM/YYYY</span> | Time: <span th:text="${timeSlot}">09:00 - 11:00</span></p>
         <a th:href="@{${frontendUrl}/spaces}" class="cta-button">View Reservation</a>

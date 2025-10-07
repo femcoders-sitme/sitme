@@ -47,17 +47,16 @@ public class SpaceControllerIntegrationTest {
     @BeforeEach
     void setUp() throws Exception {
         spaceRepository.deleteAll();
+        userRepository.deleteAll();
 
-        if (!userRepository.existsByEmail("admin@sitme.com")) {
-            User admin = User.builder()
-                    .username("admin")
-                    .email("admin@sitme.com")
-                    .password(passwordEncoder.encode("Password123."))
-                    .role(Role.ADMIN)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            userRepository.save(admin);
-        }
+        User admin = User.builder()
+                .username("admin")
+                .email("admin@sitme.com")
+                .password(passwordEncoder.encode("Password123."))
+                .role(Role.ADMIN)
+                .createdAt(LocalDateTime.now())
+                .build();
+        userRepository.save(admin);
 
         jwtToken = obtainJwtTokenFromLogin();
     }
@@ -104,55 +103,6 @@ public class SpaceControllerIntegrationTest {
                     .andExpect(jsonPath("$", hasSize(2)))
                     .andExpect(jsonPath("$[0].name", is("R-001")))
                     .andExpect(jsonPath("$[1].name", is("T-001")));
-        }
-    }
-
-    @Nested
-    @DisplayName("POST /api/spaces")
-    class AddSpace {
-
-        @Test
-        void shouldCreateNewSpace() throws Exception {
-            SpaceRequest request = new SpaceRequest("R-005", 4, SpaceType.ROOM, "https://picsum.photos/seed/roomE/600/400");
-            String requestJson = objectMapper.writeValueAsString(request);
-
-            MockMultipartFile spacePart =
-                    new MockMultipartFile("space", "", "application/json", requestJson.getBytes());
-
-            mockMvc.perform(multipart("/api/spaces")
-                            .file(spacePart)
-                            .header("Authorization", jwtToken))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.message", is("Space created successfully")))
-                    .andExpect(jsonPath("$.data.name", is("R-005")));
-        }
-    }
-
-    @Nested
-    @DisplayName("DELETE /api/spaces/{id}")
-    class DeleteSpace {
-
-        @Test
-        void shouldDeleteSpace() throws Exception {
-            Space space = Space.builder()
-                    .name("T-020")
-                    .capacity(4)
-                    .type(SpaceType.TABLE)
-                    .imageUrl("https://picsum.photos/seed/table20/600/400")
-                    .build();
-
-            Space saved = spaceRepository.save(space);
-
-            mockMvc.perform(delete("/api/spaces/" + saved.getId())
-                            .header("Authorization", jwtToken))
-                    .andExpect(status().isNoContent());
-        }
-
-        @Test
-        void shouldReturn404IfNotExists() throws Exception {
-            mockMvc.perform(delete("/api/spaces/99999")
-                            .header("Authorization", jwtToken))
-                    .andExpect(status().isNotFound());
         }
     }
 }

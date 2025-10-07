@@ -24,7 +24,7 @@
         <img src="https://res.cloudinary.com/dnrtgr353/image/upload/v1758704025/logo_jyae8t.jpg" alt="SitMe Logo">
     </div>
     <div class="card-body">
-        <h1>Reservation Cancelled, <span th:text="${username}">User</span>!</h1>
+        <h1>Reservation cancelled, <span th:text="${username}">User</span>!</h1>
         <p>Your workspace <strong th:text="${spaceName}">Space Name</strong> reservation scheduled for <span th:text="${date}">DD/MM/YYYY</span> at <span th:text="${timeSlot}">09:00 - 11:00</span> has been cancelled.</p>
         <a th:href="@{${frontendUrl}/spaces}" class="cta-button">Book a New Spot</a>
     </div>

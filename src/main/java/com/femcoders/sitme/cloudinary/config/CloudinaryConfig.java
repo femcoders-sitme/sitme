@@ -12,12 +12,14 @@ import java.util.Map;
 @Configuration
 @ConfigurationProperties(prefix = "cloudinary")
 public class CloudinaryConfig {
+
     private String cloudName;
     private String apiKey;
     private String apiSecret;
 
     @Bean
     public Cloudinary cloudinary() {
+
         return new Cloudinary(Map.of(
                 "cloud_name", cloudName,
                 "api_key", apiKey,

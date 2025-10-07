@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface SpaceService {
+
     List<SpaceResponse> getAllSpaces();
     List<SpaceResponse> getSpacesByType(SpaceType type);
     SpaceResponse getSpaceById(Long id);

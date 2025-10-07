@@ -166,6 +166,38 @@ class ReservationControllerIntegrationTest {
     }
 
     @Nested
+    @DisplayName("GET /api/reservations/{id}")
+    class GetReservationById {
+
+        @Test
+        void shouldReturnReservationById() throws Exception {
+            Reservation reservation = reservationRepository.save(
+                    Reservation.builder()
+                            .reservationDate(LocalDate.now().plusDays(2))
+                            .timeSlot(TimeSlot.MORNING)
+                            .status(Status.ACTIVE)
+                            .emailSent(false)
+                            .createdAt(LocalDateTime.now())
+                            .user(testUser)
+                            .space(testSpace)
+                            .build()
+            );
+
+            mockMvc.perform(get("/api/reservations/{id}", reservation.getId())
+                            .header("Authorization", "Bearer " + adminToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.id").value(reservation.getId()));
+        }
+
+        @Test
+        void shouldReturn404IfReservationNotFound() throws Exception {
+            mockMvc.perform(get("/api/reservations/99999")
+                            .header("Authorization", "Bearer " + adminToken))
+                    .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
     @DisplayName("POST /api/reservations")
     class AddReservation {
 

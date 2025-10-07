@@ -26,6 +26,7 @@ public class SpaceServiceImpl implements SpaceService {
 
     @Override
     public List<SpaceResponse> getAllSpaces() {
+
         return spaceRepository.findAll()
                 .stream()
                 .map(SpaceMapper::entityToDto)
@@ -34,6 +35,7 @@ public class SpaceServiceImpl implements SpaceService {
 
     @Override
     public List<SpaceResponse> getSpacesByType(SpaceType type) {
+
         return spaceRepository.findByType(type)
                 .stream()
                 .map(SpaceMapper::entityToDto)
@@ -42,6 +44,7 @@ public class SpaceServiceImpl implements SpaceService {
 
     @Override
     public SpaceResponse getSpaceById(Long id) {
+
         Space space = spaceRepository.findById(id)
                 .orElseThrow(()->new EntityNotFoundException(Space.class.getSimpleName(), id));
 
@@ -74,6 +77,7 @@ public class SpaceServiceImpl implements SpaceService {
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public SpaceResponse updateSpace(Long id, SpaceRequest spaceRequest, MultipartFile file){
+
         Space isExisting = spaceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Not exists by id: " + id));
 
@@ -87,19 +91,21 @@ public class SpaceServiceImpl implements SpaceService {
         }
 
         Space savedSpace = spaceRepository.save(isExisting);
+
         return SpaceMapper.entityToDto(savedSpace);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public void deleteSpace(Long id) {
+
         Space spaceToDelete = spaceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Space", id));
+
         if (spaceToDelete.getCloudinaryImageId() != null && !spaceToDelete.getCloudinaryImageId().isBlank()) {
             cloudinaryService.deleteEntityImage(spaceToDelete);
         }
 
         spaceRepository.deleteById(id);
-
     }
 }

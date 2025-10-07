@@ -30,7 +30,9 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public List<UserResponse> getAllUsers() {
+
         List<User> users = userRepository.findAll();
+
         return users.stream()
                 .map(UserMapper::entityToDto)
                 .collect(Collectors.toList());
@@ -39,8 +41,10 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public UserResponse getUserById(Long id) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(User.class.getSimpleName(), id));
+
         return UserMapper.entityToDto(user);
     }
 
@@ -71,11 +75,12 @@ public class UserServiceImpl implements UserService {
         }
 
         if (file != null && !file.isEmpty()) {
-            cloudinaryService.uploadEntityImage(existingUser, file, "sitme/users");
             cloudinaryService.deleteEntityImage(existingUser);
+            cloudinaryService.uploadEntityImage(existingUser, file, "sitme/users");
         }
 
         User updatedUser = userRepository.save(existingUser);
+
         return UserMapper.entityToDto(updatedUser);
     }
 
@@ -83,6 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse uploadUserImage(Long id, MultipartFile file) {
+
         User user = userRepository.findById(id)
                     .orElseThrow(()-> new EntityNotFoundException(User.class.getSimpleName(), id));
 
@@ -97,8 +103,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long id) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(User.class.getSimpleName(), id));
+
         userRepository.deleteById(id);
     }
 
@@ -106,6 +114,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUserImage(Long id) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException(User.class.getSimpleName(), id));
 

@@ -28,28 +28,28 @@ public class EmailService {
 
         sendEmail(recipientEmail, username, null, null, null,
                 "registry-notification",
-                "Successful registration | SitMe App");
+                "Successful Registration | SitMe App");
     }
 
     public void sendReservationConfirmationEmail(String recipientEmail, String username, String spaceName, LocalDate reservationDate, String timeSlot) {
 
         sendEmail(recipientEmail, username, spaceName, reservationDate, timeSlot,
                 "reservation-confirmation",
-                "Reservation confirmed | SitMe App");
+                "Reservation Confirmed | SitMe App");
     }
 
     public void sendReservationUpdateEmail(String recipientEmail, String username, String spaceName, LocalDate reservationDate, String timeSlot) {
 
         sendEmail(recipientEmail, username, spaceName, reservationDate, timeSlot,
                 "update-notification",
-                "Reservation updated | SitMe App");
+                "Reservation Updated | SitMe App");
     }
 
     public void sendReservationCancellationEmail(String recipientEmail, String username, String spaceName, LocalDate reservationDate, String timeSlot) {
 
         sendEmail(recipientEmail, username, spaceName, reservationDate, timeSlot,
                 "cancellation-notification",
-                "Reservation cancelled | SitMe App");
+                "Reservation Cancelled | SitMe App");
 
     }
 
