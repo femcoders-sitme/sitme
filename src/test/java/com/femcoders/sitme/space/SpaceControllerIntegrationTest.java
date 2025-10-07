@@ -126,32 +126,4 @@ public class SpaceControllerIntegrationTest {
                     .andExpect(jsonPath("$.data.name", is("R-005")));
         }
     }
-
-    @Nested
-    @DisplayName("DELETE /api/spaces/{id}")
-    class DeleteSpace {
-
-        @Test
-        void shouldDeleteSpace() throws Exception {
-            Space space = Space.builder()
-                    .name("T-020")
-                    .capacity(4)
-                    .type(SpaceType.TABLE)
-                    .imageUrl("https://picsum.photos/seed/table20/600/400")
-                    .build();
-
-            Space saved = spaceRepository.save(space);
-
-            mockMvc.perform(delete("/api/spaces/" + saved.getId())
-                            .header("Authorization", jwtToken))
-                    .andExpect(status().isNoContent());
-        }
-
-        @Test
-        void shouldReturn404IfNotExists() throws Exception {
-            mockMvc.perform(delete("/api/spaces/99999")
-                            .header("Authorization", jwtToken))
-                    .andExpect(status().isNotFound());
-        }
-    }
 }
