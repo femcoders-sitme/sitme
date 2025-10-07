@@ -47,17 +47,16 @@ public class SpaceControllerIntegrationTest {
     @BeforeEach
     void setUp() throws Exception {
         spaceRepository.deleteAll();
+        userRepository.deleteAll();
 
-        if (!userRepository.existsByEmail("admin@sitme.com")) {
-            User admin = User.builder()
-                    .username("admin")
-                    .email("admin@sitme.com")
-                    .password(passwordEncoder.encode("Password123."))
-                    .role(Role.ADMIN)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            userRepository.save(admin);
-        }
+        User admin = User.builder()
+                .username("admin")
+                .email("admin@sitme.com")
+                .password(passwordEncoder.encode("Password123."))
+                .role(Role.ADMIN)
+                .createdAt(LocalDateTime.now())
+                .build();
+        userRepository.save(admin);
 
         jwtToken = obtainJwtTokenFromLogin();
     }
