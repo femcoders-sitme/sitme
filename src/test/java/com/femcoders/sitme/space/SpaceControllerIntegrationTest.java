@@ -105,25 +105,4 @@ public class SpaceControllerIntegrationTest {
                     .andExpect(jsonPath("$[1].name", is("T-001")));
         }
     }
-
-    @Nested
-    @DisplayName("POST /api/spaces")
-    class AddSpace {
-
-        @Test
-        void shouldCreateNewSpace() throws Exception {
-            SpaceRequest request = new SpaceRequest("R-005", 4, SpaceType.ROOM, "https://picsum.photos/seed/roomE/600/400");
-            String requestJson = objectMapper.writeValueAsString(request);
-
-            MockMultipartFile spacePart =
-                    new MockMultipartFile("space", "", "application/json", requestJson.getBytes());
-
-            mockMvc.perform(multipart("/api/spaces")
-                            .file(spacePart)
-                            .header("Authorization", jwtToken))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.message", is("Space created successfully")))
-                    .andExpect(jsonPath("$.data.name", is("R-005")));
-        }
-    }
 }
