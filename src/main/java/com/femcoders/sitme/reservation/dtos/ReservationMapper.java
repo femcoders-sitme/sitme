@@ -9,6 +9,7 @@ import com.femcoders.sitme.user.User;
 public class ReservationMapper {
 
     public static Reservation dtoToEntity(ReservationRequest request, User user, Space space) {
+
         return Reservation.builder()
                 .reservationDate(request.reservationDate())
                 .timeSlot(request.timeSlot())
@@ -20,6 +21,7 @@ public class ReservationMapper {
     }
 
     public static ReservationResponse entityToDto(Reservation reservation) {
+
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getReservationDate(),

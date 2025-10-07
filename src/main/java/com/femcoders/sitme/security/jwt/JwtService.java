@@ -22,10 +22,12 @@ public class JwtService {
     private Long jwtExpiration;
 
     public String generateToken(CustomUserDetails userDetails) {
+
         return buildToken(userDetails, jwtExpiration);
     }
 
     private String buildToken(CustomUserDetails userDetails, Long jwtExpiration) {
+
         return Jwts
                 .builder()
                 .claim("role", userDetails.getAuthorities().toString())
@@ -37,14 +39,17 @@ public class JwtService {
     }
 
     public String extractUserId(String token) {
+
         return extractAllClaims(token).getSubject();
     }
 
     public Date extractExpiration(String token) {
+
         return extractAllClaims(token).getExpiration();
     }
 
     public boolean isValidToken(String token, UserDetails userDetails) {
+
         try {
             final String userIdFromToken = extractUserId(token);
             CustomUserDetails customUser = (CustomUserDetails) userDetails;
@@ -55,10 +60,12 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
+
         return extractExpiration(token).before(new Date());
     }
 
     private Claims extractAllClaims(String token) {
+
         return Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
@@ -67,7 +74,9 @@ public class JwtService {
     }
 
     private SecretKey getSignKey() {
+
         byte[] bytes = Decoders.BASE64.decode(jwtSecretKey);
+
         return Keys.hmacShaKeyFor(bytes);
     }
 }

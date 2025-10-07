@@ -10,6 +10,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 public class ErrorResponse {
+
     private String errorCode;
     private String message;
     private int status;
@@ -18,6 +19,7 @@ public class ErrorResponse {
     private String path;
 
     public ErrorResponse(ErrorCode errorCode, String message, HttpStatus httpStatus, String path) {
+
         this.errorCode = errorCode.name();
         this.message = message;
         this.status = httpStatus.value();

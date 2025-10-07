@@ -14,11 +14,13 @@ import java.util.Map;
 
 @Service
 public class CloudinaryService {
+
     @Autowired
     private Cloudinary cloudinary;
 
     @Transactional
     public CloudinaryDTO uploadFile(MultipartFile file, String folder, String fileName) {
+
         try {
             Map<?,?> result = cloudinary.uploader().upload(
                     file.getBytes(),
@@ -33,6 +35,7 @@ public class CloudinaryService {
     }
 
     public void deleteFile(String publicId) {
+
         try {
             cloudinary.uploader().destroy(publicId, Map.of());
         } catch (Exception e) {
@@ -41,6 +44,7 @@ public class CloudinaryService {
     }
 
     public <T extends ImageUpdatable> T uploadEntityImage(T entity, MultipartFile file, String folder) {
+
         FileUploadUtil.assertAllowed(file, FileUploadUtil.IMAGE_PATTERN);
         String fileName = FileUploadUtil.getFileName(file.getOriginalFilename());
         CloudinaryDTO dto = uploadFile(file, folder, fileName);
@@ -52,6 +56,7 @@ public class CloudinaryService {
     }
 
     public <T extends ImageUpdatable> T deleteEntityImage(T entity) {
+
         try {
             String publicId = entity.getCloudinaryImageId();
 
@@ -67,5 +72,4 @@ public class CloudinaryService {
             throw new FileUploadException("Failed to delete image from Cloudinary");
         }
     }
-
 }

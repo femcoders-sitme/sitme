@@ -42,5 +42,4 @@ public class Space implements ImageUpdatable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Reservation> reservations;
-
 }
